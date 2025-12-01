@@ -1,5 +1,6 @@
 import {
   Circle,
+  Eraser,
   MousePointer2,
   Pencil,
   Redo2,
@@ -115,6 +116,17 @@ export const Toolbar = ({
             })
           }
           isActive={canvasState.mode === CanvasMode.Pencil}
+        />
+
+        <ToolButton
+          label="Eraser"
+          icon={Eraser}
+          onClick={() =>
+            setCanvasState({
+              mode: CanvasMode.Eraser,
+            })
+          }
+          isActive={canvasState.mode === CanvasMode.Eraser}
         />
       </div>
 

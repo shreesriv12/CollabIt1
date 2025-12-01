@@ -63,6 +63,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     g: 0,
     b: 0,
   });
+  const [cursorPosition, setCursorPosition] = useState<Point | null>(null);
 
   useDisableScrollBounce();
   const history = useHistory();
@@ -232,6 +233,47 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     [lastUsedColor],
   );
 
+  const eraseLayer = useMutation(
+    ({ storage }, point: Point) => {
+      const liveLayers = storage.get("layers");
+      const liveLayerIds = storage.get("layerIds");
+
+      // Find the topmost layer at this point
+      const layers = liveLayers.entries();
+      let layerToErase: string | null = null;
+
+      // Check layers from back to front (reverse order of layerIds)
+      for (let i = liveLayerIds.length - 1; i >= 0; i--) {
+        const layerId = liveLayerIds.get(i);
+        const layer = liveLayers.get(layerId);
+        
+        if (!layer) continue;
+
+        // Check if point is within layer bounds
+        const layerData = layer.toObject();
+        if (
+          point.x >= layerData.x &&
+          point.x <= layerData.x + layerData.width &&
+          point.y >= layerData.y &&
+          point.y <= layerData.y + layerData.height
+        ) {
+          layerToErase = layerId;
+          break;
+        }
+      }
+
+      // Erase the found layer
+      if (layerToErase) {
+        liveLayers.delete(layerToErase);
+        const index = liveLayerIds.indexOf(layerToErase);
+        if (index !== -1) {
+          liveLayerIds.delete(index);
+        }
+      }
+    },
+    [],
+  );
+
   const resizeSelectedLayer = useMutation(
     ({ storage, self }, point: Point) => {
       if (canvasState.mode !== CanvasMode.Resizing) return;
@@ -286,6 +328,12 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         resizeSelectedLayer(current);
       } else if (canvasState.mode === CanvasMode.Pencil) {
         continueDrawing(current, e);
+      } else if (canvasState.mode === CanvasMode.Eraser) {
+        // Erase while dragging
+        if (e.buttons === 1) {
+          eraseLayer(current);
+        }
+        setCursorPosition(current);
       }
 
       setMyPresence({ cursor: current });
@@ -298,6 +346,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       resizeSelectedLayer,
       camera,
       translateSelectedLayers,
+      eraseLayer,
     ],
   );
 
@@ -305,6 +354,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     setMyPresence({
       cursor: null,
     });
+    setCursorPosition(null);
   }, []);
 
   const onPointerDown = useCallback(
@@ -318,9 +368,14 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         return;
       }
 
+      if (canvasState.mode === CanvasMode.Eraser) {
+        eraseLayer(point);
+        return;
+      }
+
       setCanvasState({ origin: point, mode: CanvasMode.Pressing });
     },
-    [camera, canvasState.mode, setCanvasState, startDrawing],
+    [camera, canvasState.mode, setCanvasState, startDrawing, eraseLayer],
   );
 
   const onPointerUp = useMutation(
@@ -418,6 +473,12 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     };
   }, [deleteLayers, history]);
 
+  useEffect(() => {
+    if (canvasState.mode !== CanvasMode.Eraser) {
+      setCursorPosition(null);
+    }
+  }, [canvasState.mode]);
+
   return (
     <main className="h-full w-full relative bg-neutral-100 touch-none">
       <Info boardId={boardId} />
@@ -433,7 +494,13 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       <SelectionTools camera={camera} setLastUsedColor={setLastUsedColor} />
 
       <svg
-        className="h-[100vh] w-[100vw]"
+        className={`h-[100vh] w-[100vw] ${
+          canvasState.mode === CanvasMode.Pencil
+            ? "cursor-crosshair"
+            : canvasState.mode === CanvasMode.Eraser
+            ? "cursor-none"
+            : ""
+        }`}
         onWheel={onWheel}
         onPointerMove={onPointerMove}
         onPointerLeave={onPointerLeave}
@@ -465,6 +532,25 @@ export const Canvas = ({ boardId }: CanvasProps) => {
               />
             )}
           <CursorsPresence />
+          {canvasState.mode === CanvasMode.Eraser && cursorPosition && (
+            <g transform={`translate(${cursorPosition.x}, ${cursorPosition.y})`}>
+              <circle
+                cx="0"
+                cy="0"
+                r="12"
+                fill="none"
+                stroke="#ef4444"
+                strokeWidth="2"
+                strokeDasharray="4 2"
+              />
+              <circle
+                cx="0"
+                cy="0"
+                r="2"
+                fill="#ef4444"
+              />
+            </g>
+          )}
           {pencilDraft != null && pencilDraft.length > 0 && (
             <Path
               points={pencilDraft}
