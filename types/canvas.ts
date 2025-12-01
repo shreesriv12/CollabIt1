@@ -15,6 +15,7 @@ export enum LayerType {
   Path,
   Text,
   Note,
+  MindMapNode,
   Diamond,
   Triangle,
   Hexagon,
@@ -97,6 +98,25 @@ export type NoteLayer = {
   width: number;
   fill: Color;
   value?: string;
+};
+
+export type MindMapNodeLayer = {
+  type: LayerType.MindMapNode;
+  x: number;
+  y: number;
+  height: number;
+  width: number;
+  fill: Color;
+  stroke?: Color;
+  strokeWidth?: number;
+  value?: string;
+  // Mind map specific properties
+  mindMapId?: string;
+  nodeId: string;
+  level: number;
+  parentId?: string;
+  description?: string;
+  isExpanded?: boolean;
 };
 
 export type AdvancedShapeLayer = {
@@ -190,4 +210,5 @@ export type Layer =
   | PathLayer
   | TextLayer
   | NoteLayer
+  | MindMapNodeLayer
   | AdvancedShapeLayer;

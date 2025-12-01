@@ -10,9 +10,11 @@ import {
   Type,
   Undo2,
   Workflow,
+  Sparkles,
 } from "lucide-react";
 
 import { CanvasMode, LayerType, type CanvasState } from "@/types/canvas";
+import { useAIMindmapModal } from "@/store/use-ai-mindmap-modal";
 
 import { ToolButton } from "./tool-button";
 
@@ -41,6 +43,8 @@ export const Toolbar = ({
   showFlowDiagram,
   setShowFlowDiagram,
 }: ToolbarProps) => {
+  const { open: openAIMindmapModal } = useAIMindmapModal();
+
   return (
     <div className="absolute top-[50%] -translate-y-[50%] left-2 flex flex-col gap-y-4">
       <div className="bg-white rounded-md p-1.5 flex gap-y-1 flex-col items-center shadow-md">
@@ -55,6 +59,13 @@ export const Toolbar = ({
             canvasState.mode === CanvasMode.Pressing ||
             canvasState.mode === CanvasMode.Resizing
           }
+        />
+
+        <ToolButton
+          label="AI Mind Map"
+          icon={Sparkles}
+          onClick={openAIMindmapModal}
+          isActive={false}
         />
 
         <ToolButton

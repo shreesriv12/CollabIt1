@@ -12,6 +12,7 @@ import { Rectangle } from "./rectangle";
 import { Text } from "./text";
 import { Path } from "./path";
 import { AdvancedShape } from "./advanced-shape";
+import { MindMapNode } from "./mindmap-node";
 
 type LayerPreviewProps = {
   id: string;
@@ -73,6 +74,15 @@ export const LayerPreview = memo(
             onPointerDown={onLayerPointerDown}
             selectionColor={selectionColor}
             layer={layer}
+          />
+        );
+      case LayerType.MindMapNode:
+        return (
+          <MindMapNode
+            id={id}
+            layer={layer}
+            onPointerDown={onLayerPointerDown}
+            selectionColor={selectionColor}
           />
         );
       // Basic Shapes

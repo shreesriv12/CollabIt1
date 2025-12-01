@@ -45,6 +45,12 @@ import { SelectionBox } from "./selection-box";
 import { SelectionTools } from "./selection-tools";
 import { ShapesToolbar } from "./shapes-toolbar";
 import { Toolbar } from "./toolbar";
+import { AIMindmapModal } from "@/components/modals/ai-mindmap-modal";
+import { useAIMindmapModal } from "@/store/use-ai-mindmap-modal";
+import { convertMindMapToLayers, findOptimalMindMapPosition, adjustMindMapPositions } from "@/lib/mindmap-converter";
+import { MindMapData } from "@/lib/ai-mindmap";
+import { MindMapConnection } from "./mindmap-connection";
+import { MindMapConnectionsRenderer } from "./mindmap-connections-renderer";
 
 const MAX_LAYERS = 100;
 const MULTISELECTION_THRESHOLD = 5;
@@ -78,6 +84,9 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   const [isInserting, setIsInserting] = useState(false);
   const [insertionStart, setInsertionStart] = useState<Point | null>(null);
   const [currentPointer, setCurrentPointer] = useState<Point | null>(null);
+
+  // AI Mindmap modal state
+  const { isOpen: isAIMindmapModalOpen, close: closeAIMindmapModal } = useAIMindmapModal();
 
   useDisableScrollBounce();
   const history = useHistory();
@@ -249,6 +258,46 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     },
     [strokeColor, strokeWidth],
   );
+
+  const insertMindMapLayers = useMutation(
+    ({ storage, setMyPresence }, mindMapData: MindMapData) => {
+      const liveLayers = storage.get("layers");
+      const liveLayerIds = storage.get("layerIds");
+
+      // Convert mindmap data to layers
+      const conversion = convertMindMapToLayers(mindMapData);
+      
+      // Find optimal position for the mindmap
+      const existingLayers: Record<string, any> = {};
+      liveLayerIds.forEach((id) => {
+        const layer = liveLayers.get(id);
+        if (layer) {
+          existingLayers[id] = layer.toObject();
+        }
+      });
+      
+      const targetCenter = findOptimalMindMapPosition(existingLayers);
+      const adjustedLayers = adjustMindMapPositions(conversion.layers, targetCenter);
+      
+      // Insert all mindmap layers
+      const newLayerIds: string[] = [];
+      Object.entries(adjustedLayers).forEach(([layerId, layer]) => {
+        const liveLayer = new LiveObject(layer);
+        liveLayers.set(layerId, liveLayer);
+        liveLayerIds.push(layerId);
+        newLayerIds.push(layerId);
+      });
+
+      // Select all the new mindmap layers
+      setMyPresence({ selection: newLayerIds }, { addToHistory: true });
+    },
+    [],
+  );
+
+  // Handler for AI mindmap generation
+  const handleMindMapGenerate = useCallback((mindMapData: MindMapData) => {
+    insertMindMapLayers(mindMapData);
+  }, [insertMindMapLayers]);
 
   const translateSelectedLayers = useMutation(
     ({ storage, self }, point: Point) => {
@@ -724,6 +773,10 @@ export const Canvas = ({ boardId }: CanvasProps) => {
               selectionColor={layerIdsToColorSelection[layerId]}
             />
           ))}
+          
+          {/* Render mindmap connections */}
+          <MindMapConnectionsRenderer layerIds={layerIds} />
+
           <SelectionBox onResizeHandlePointerDown={onResizeHandlePointerDown} />
           {canvasState.mode === CanvasMode.SelectionNet &&
             canvasState.current != null && (
@@ -800,6 +853,13 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       <FlowDiagram 
         isOpen={showFlowDiagram} 
         onClose={() => setShowFlowDiagram(false)} 
+      />
+      
+      {/* AI Mindmap Modal */}
+      <AIMindmapModal
+        isOpen={isAIMindmapModalOpen}
+        onClose={closeAIMindmapModal}
+        onGenerate={handleMindMapGenerate}
       />
     </main>
   );
