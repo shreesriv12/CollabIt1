@@ -36,12 +36,14 @@ import {
 
 import { CursorsPresence } from "./cursors-presence";
 import { DrawingTools } from "./drawing-tools";
+import { FlowDiagram } from "./flow-diagram";
 import { Info } from "./info";
 import { LayerPreview } from "./layer-preview";
 import { Participants } from "./participants";
 import { Path } from "./path";
 import { SelectionBox } from "./selection-box";
 import { SelectionTools } from "./selection-tools";
+import { ShapesToolbar } from "./shapes-toolbar";
 import { Toolbar } from "./toolbar";
 
 const MAX_LAYERS = 100;
@@ -71,6 +73,11 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     g: 0,
     b: 0,
   });
+  const [showShapesToolbar, setShowShapesToolbar] = useState<boolean>(false);
+  const [showFlowDiagram, setShowFlowDiagram] = useState<boolean>(false);
+  const [isInserting, setIsInserting] = useState(false);
+  const [insertionStart, setInsertionStart] = useState<Point | null>(null);
+  const [currentPointer, setCurrentPointer] = useState<Point | null>(null);
 
   useDisableScrollBounce();
   const history = useHistory();
@@ -84,7 +91,33 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         | LayerType.Ellipse
         | LayerType.Rectangle
         | LayerType.Text
-        | LayerType.Note,
+        | LayerType.Note
+        | LayerType.Diamond
+        | LayerType.Triangle
+        | LayerType.Hexagon
+        | LayerType.Star
+        | LayerType.Arrow
+        | LayerType.Parallelogram
+        | LayerType.Trapezoid
+        | LayerType.FlowStart
+        | LayerType.FlowProcess
+        | LayerType.FlowDecision
+        | LayerType.FlowDocument
+        | LayerType.FlowDatabase
+        | LayerType.FlowConnector
+        | LayerType.UMLClass
+        | LayerType.UMLInterface
+        | LayerType.UMLActor
+        | LayerType.UMLUseCase
+        | LayerType.UMLComponent
+        | LayerType.UMLPackage
+        | LayerType.WireButton
+        | LayerType.WireInput
+        | LayerType.WireImage
+        | LayerType.WireText
+        | LayerType.WireCheckbox
+        | LayerType.WireRadio
+        | LayerType.WireDropdown,
       position: Point,
     ) => {
       const liveLayers = storage.get("layers");
@@ -93,6 +126,15 @@ export const Canvas = ({ boardId }: CanvasProps) => {
 
       const liveLayerIds = storage.get("layerIds");
       const layerId = nanoid();
+      
+      // Check if it's an advanced shape
+      const isAdvancedShape = ![
+        LayerType.Ellipse,
+        LayerType.Rectangle,
+        LayerType.Text,
+        LayerType.Note,
+      ].includes(layerType);
+
       const layer = new LiveObject({
         type: layerType,
         x: position.x,
@@ -102,6 +144,17 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         fill: lastUsedColor,
         stroke: strokeColor,
         strokeWidth: strokeWidth,
+        ...(isAdvancedShape && { 
+          shapeType: layerType,
+          text: layerType === LayerType.UMLClass ? 'Class Name' :
+                layerType === LayerType.UMLInterface ? 'Interface Name' :
+                layerType === LayerType.UMLActor ? 'Actor' :
+                layerType === LayerType.UMLUseCase ? 'Use Case' :
+                layerType === LayerType.WireButton ? 'Button' :
+                layerType === LayerType.WireInput ? 'Input Field' :
+                layerType === LayerType.WireText ? 'Text Block' :
+                layerType === LayerType.WireCheckbox ? 'Checkbox' : ''
+        }),
       });
 
       liveLayerIds.push(layerId);
@@ -111,6 +164,90 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       setCanvasState({ mode: CanvasMode.None });
     },
     [lastUsedColor, strokeColor, strokeWidth],
+  );
+
+  const insertLayerWithSize = useMutation(
+    (
+      { storage, setMyPresence },
+      layerType:
+        | LayerType.Ellipse
+        | LayerType.Rectangle
+        | LayerType.Text
+        | LayerType.Note
+        | LayerType.Diamond
+        | LayerType.Triangle
+        | LayerType.Hexagon
+        | LayerType.Star
+        | LayerType.Arrow
+        | LayerType.Parallelogram
+        | LayerType.Trapezoid
+        | LayerType.FlowStart
+        | LayerType.FlowProcess
+        | LayerType.FlowDecision
+        | LayerType.FlowDocument
+        | LayerType.FlowDatabase
+        | LayerType.FlowConnector
+        | LayerType.UMLClass
+        | LayerType.UMLInterface
+        | LayerType.UMLActor
+        | LayerType.UMLUseCase
+        | LayerType.UMLComponent
+        | LayerType.UMLPackage
+        | LayerType.WireButton
+        | LayerType.WireInput
+        | LayerType.WireImage
+        | LayerType.WireText
+        | LayerType.WireCheckbox
+        | LayerType.WireRadio
+        | LayerType.WireDropdown,
+      position: Point,
+      width: number,
+      height: number,
+    ) => {
+      const liveLayers = storage.get("layers");
+
+      if (liveLayers.size >= MAX_LAYERS) return;
+
+      const liveLayerIds = storage.get("layerIds");
+      const layerId = nanoid();
+      
+      // Check if it's an advanced shape
+      const isAdvancedShape = ![
+        LayerType.Ellipse,
+        LayerType.Rectangle,
+        LayerType.Text,
+        LayerType.Note,
+      ].includes(layerType);
+
+      const layer = new LiveObject({
+        type: layerType,
+        x: position.x,
+        y: position.y,
+        height: height,
+        width: width,
+        fill: { r: 255, g: 255, b: 255, a: 0.1 }, // Transparent fill
+        stroke: strokeColor,
+        strokeWidth: strokeWidth,
+        ...(isAdvancedShape && { 
+          shapeType: layerType,
+          text: layerType === LayerType.UMLClass ? 'Class Name' :
+                layerType === LayerType.UMLInterface ? 'Interface Name' :
+                layerType === LayerType.UMLActor ? 'Actor' :
+                layerType === LayerType.UMLUseCase ? 'Use Case' :
+                layerType === LayerType.WireButton ? 'Button' :
+                layerType === LayerType.WireInput ? 'Input Field' :
+                layerType === LayerType.WireText ? 'Text Block' :
+                layerType === LayerType.WireCheckbox ? 'Checkbox' : ''
+        }),
+      });
+
+      liveLayerIds.push(layerId);
+      liveLayers.set(layerId, layer);
+
+      setMyPresence({ selection: [layerId] }, { addToHistory: true });
+      setCanvasState({ mode: CanvasMode.None });
+    },
+    [strokeColor, strokeWidth],
   );
 
   const translateSelectedLayers = useMutation(
@@ -327,7 +464,9 @@ export const Canvas = ({ boardId }: CanvasProps) => {
 
       const current = pointerEventToCanvasPoint(e, camera);
 
-      if (canvasState.mode === CanvasMode.Pressing) {
+      if (canvasState.mode === CanvasMode.Inserting && isInserting) {
+        setCurrentPointer(current);
+      } else if (canvasState.mode === CanvasMode.Pressing) {
         startMultiSelection(current, canvasState.origin);
       } else if (canvasState.mode === CanvasMode.SelectionNet) {
         updateSelectionNet(current, canvasState.origin);
@@ -356,6 +495,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       camera,
       translateSelectedLayers,
       eraseLayer,
+      isInserting,
     ],
   );
 
@@ -370,7 +510,12 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     (e: React.PointerEvent) => {
       const point = pointerEventToCanvasPoint(e, camera);
 
-      if (canvasState.mode === CanvasMode.Inserting) return;
+      if (canvasState.mode === CanvasMode.Inserting) {
+        setIsInserting(true);
+        setInsertionStart(point);
+        setCurrentPointer(point);
+        return;
+      }
 
       if (canvasState.mode === CanvasMode.Pencil) {
         startDrawing(point, e.pressure);
@@ -391,6 +536,27 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     ({}, e) => {
       const point = pointerEventToCanvasPoint(e, camera);
 
+      if (canvasState.mode === CanvasMode.Inserting && isInserting && insertionStart && currentPointer) {
+        // Calculate the size based on distance from start
+        const width = Math.abs(currentPointer.x - insertionStart.x);
+        const height = Math.abs(currentPointer.y - insertionStart.y);
+        
+        // Minimum size to prevent tiny shapes
+        const finalWidth = Math.max(width, 50);
+        const finalHeight = Math.max(height, 50);
+        
+        // Calculate position (top-left corner)
+        const x = Math.min(insertionStart.x, currentPointer.x);
+        const y = Math.min(insertionStart.y, currentPointer.y);
+        
+        insertLayerWithSize(canvasState.layerType, { x, y }, finalWidth, finalHeight);
+        
+        setIsInserting(false);
+        setInsertionStart(null);
+        setCurrentPointer(null);
+        return;
+      }
+
       if (
         canvasState.mode === CanvasMode.None ||
         canvasState.mode === CanvasMode.Pressing
@@ -402,7 +568,9 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       } else if (canvasState.mode === CanvasMode.Pencil) {
         insertPath();
       } else if (canvasState.mode === CanvasMode.Inserting) {
-        insertLayer(canvasState.layerType, point);
+        setCanvasState({
+          mode: CanvasMode.None,
+        });
       } else {
         setCanvasState({
           mode: CanvasMode.None,
@@ -417,8 +585,12 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       canvasState,
       history,
       insertLayer,
+      insertLayerWithSize,
       unselectLayers,
       insertPath,
+      isInserting,
+      insertionStart,
+      currentPointer,
     ],
   );
 
@@ -499,13 +671,22 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         canUndo={canUndo}
         undo={history.undo}
         redo={history.redo}
+        showShapesToolbar={showShapesToolbar}
+        setShowShapesToolbar={setShowShapesToolbar}
+        showFlowDiagram={showFlowDiagram}
+        setShowFlowDiagram={setShowFlowDiagram}
       />
+      
+      {showShapesToolbar && (
+        <ShapesToolbar
+          canvasState={canvasState}
+          setCanvasState={setCanvasState}
+        />
+      )}
       <SelectionTools camera={camera} setLastUsedColor={setLastUsedColor} />
       
       {(canvasState.mode === CanvasMode.Pencil || 
-        (canvasState.mode === CanvasMode.Inserting && 
-         (canvasState.layerType === LayerType.Rectangle || 
-          canvasState.layerType === LayerType.Ellipse))) && (
+        canvasState.mode === CanvasMode.Inserting) && (
         <DrawingTools
           strokeWidth={strokeWidth}
           strokeColor={strokeColor}
@@ -583,8 +764,43 @@ export const Canvas = ({ boardId }: CanvasProps) => {
               y={0}
             />
           )}
+          
+          {/* Shape insertion preview */}
+          {isInserting && insertionStart && currentPointer && canvasState.mode === CanvasMode.Inserting && (
+            <g>
+              {(() => {
+                const width = Math.abs(currentPointer.x - insertionStart.x);
+                const height = Math.abs(currentPointer.y - insertionStart.y);
+                const x = Math.min(insertionStart.x, currentPointer.x);
+                const y = Math.min(insertionStart.y, currentPointer.y);
+                
+                const strokeStyle = {
+                  stroke: colorToCSS(strokeColor),
+                  strokeWidth: strokeWidth,
+                  fill: 'none',
+                  strokeDasharray: '5,5',
+                  opacity: 0.7,
+                };
+
+                if (canvasState.layerType === LayerType.Rectangle) {
+                  return <rect x={x} y={y} width={width} height={height} {...strokeStyle} />;
+                } else if (canvasState.layerType === LayerType.Ellipse) {
+                  return <ellipse cx={x + width/2} cy={y + height/2} rx={width/2} ry={height/2} {...strokeStyle} />;
+                } else {
+                  // For advanced shapes, show as rectangle preview
+                  return <rect x={x} y={y} width={width} height={height} {...strokeStyle} />;
+                }
+              })()}
+            </g>
+          )}
         </g>
       </svg>
+      
+      {/* React Flow Diagram */}
+      <FlowDiagram 
+        isOpen={showFlowDiagram} 
+        onClose={() => setShowFlowDiagram(false)} 
+      />
     </main>
   );
 };

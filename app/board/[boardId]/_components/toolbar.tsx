@@ -4,10 +4,12 @@ import {
   MousePointer2,
   Pencil,
   Redo2,
+  Shapes,
   Square,
   StickyNote,
   Type,
   Undo2,
+  Workflow,
 } from "lucide-react";
 
 import { CanvasMode, LayerType, type CanvasState } from "@/types/canvas";
@@ -21,6 +23,10 @@ type ToolbarProps = {
   redo: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  showShapesToolbar: boolean;
+  setShowShapesToolbar: (show: boolean) => void;
+  showFlowDiagram: boolean;
+  setShowFlowDiagram: (show: boolean) => void;
 };
 
 export const Toolbar = ({
@@ -30,6 +36,10 @@ export const Toolbar = ({
   redo,
   canRedo,
   canUndo,
+  showShapesToolbar,
+  setShowShapesToolbar,
+  showFlowDiagram,
+  setShowFlowDiagram,
 }: ToolbarProps) => {
   return (
     <div className="absolute top-[50%] -translate-y-[50%] left-2 flex flex-col gap-y-4">
@@ -105,6 +115,20 @@ export const Toolbar = ({
             canvasState.mode === CanvasMode.Inserting &&
             canvasState.layerType === LayerType.Ellipse
           }
+        />
+
+        <ToolButton
+          label="Shapes"
+          icon={Shapes}
+          onClick={() => setShowShapesToolbar(!showShapesToolbar)}
+          isActive={showShapesToolbar}
+        />
+
+        <ToolButton
+          label="Flow Diagram"
+          icon={Workflow}
+          onClick={() => setShowFlowDiagram(!showFlowDiagram)}
+          isActive={showFlowDiagram}
         />
 
         <ToolButton

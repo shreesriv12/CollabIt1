@@ -15,6 +15,31 @@ export enum LayerType {
   Path,
   Text,
   Note,
+  Diamond,
+  Triangle,
+  Hexagon,
+  Star,
+  Arrow,
+  Parallelogram,
+  Trapezoid,
+  // Flowchart shapes
+  FlowStart,
+  FlowProcess,
+  FlowDecision,
+  FlowDocument,
+  FlowDatabase,
+  FlowConnector,
+  // UML shapes
+  UMLClass,
+  UMLInterface,
+  UMLActor,
+  UMLUseCase,
+  // Wireframe components
+  WireButton,
+  WireInput,
+  WireImage,
+  WireText,
+  WireCheckbox,
 }
 
 export type RectangleLayer = {
@@ -71,6 +96,24 @@ export type NoteLayer = {
   height: number;
   width: number;
   fill: Color;
+  value?: string;
+};
+
+export type AdvancedShapeLayer = {
+  type: LayerType.Diamond | LayerType.Triangle | LayerType.Hexagon | LayerType.Star | 
+        LayerType.Arrow | LayerType.Parallelogram | LayerType.Trapezoid |
+        LayerType.FlowStart | LayerType.FlowProcess | LayerType.FlowDecision |
+        LayerType.FlowDocument | LayerType.FlowDatabase | LayerType.FlowConnector |
+        LayerType.UMLClass | LayerType.UMLInterface | LayerType.UMLActor |
+        LayerType.UMLUseCase | LayerType.WireButton | LayerType.WireInput |
+        LayerType.WireImage | LayerType.WireText | LayerType.WireCheckbox;
+  x: number;
+  y: number;
+  height: number;
+  width: number;
+  fill: Color;
+  stroke?: Color;
+  strokeWidth?: number;
   value?: string;
 };
 
@@ -146,4 +189,5 @@ export type Layer =
   | EllipseLayer
   | PathLayer
   | TextLayer
-  | NoteLayer;
+  | NoteLayer
+  | AdvancedShapeLayer;

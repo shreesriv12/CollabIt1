@@ -11,6 +11,7 @@ import { Note } from "./note";
 import { Rectangle } from "./rectangle";
 import { Text } from "./text";
 import { Path } from "./path";
+import { AdvancedShape } from "./advanced-shape";
 
 type LayerPreviewProps = {
   id: string;
@@ -72,6 +73,44 @@ export const LayerPreview = memo(
             onPointerDown={onLayerPointerDown}
             selectionColor={selectionColor}
             layer={layer}
+          />
+        );
+      // Basic Shapes
+      case LayerType.Diamond:
+      case LayerType.Triangle:
+      case LayerType.Hexagon:
+      case LayerType.Star:
+      case LayerType.Arrow:
+      case LayerType.Parallelogram:
+      case LayerType.Trapezoid:
+      // Flowchart Shapes
+      case LayerType.FlowStart:
+      case LayerType.FlowProcess:
+      case LayerType.FlowDecision:
+      case LayerType.FlowDocument:
+      case LayerType.FlowDatabase:
+      case LayerType.FlowConnector:
+      // UML Shapes
+      case LayerType.UMLClass:
+      case LayerType.UMLInterface:
+      case LayerType.UMLActor:
+      case LayerType.UMLUseCase:
+      case LayerType.UMLComponent:
+      case LayerType.UMLPackage:
+      // Wireframe Components
+      case LayerType.WireButton:
+      case LayerType.WireInput:
+      case LayerType.WireImage:
+      case LayerType.WireText:
+      case LayerType.WireCheckbox:
+      case LayerType.WireRadio:
+      case LayerType.WireDropdown:
+        return (
+          <AdvancedShape
+            id={id}
+            layer={layer}
+            onPointerDown={onLayerPointerDown}
+            selectionColor={selectionColor}
           />
         );
       default:
