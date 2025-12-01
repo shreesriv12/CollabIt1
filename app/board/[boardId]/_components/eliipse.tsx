@@ -16,20 +16,22 @@ export const Ellipse = ({
   onPointerDown,
   selectionColor,
 }: EllipseProps) => {
+  const { x, y, width, height, fill, stroke, strokeWidth } = layer;
+  
   return (
     <ellipse
       className="drop-shadow-md"
       onPointerDown={(e) => onPointerDown(e, id)}
       style={{
-        transform: `translate(${layer.x}px, ${layer.y}px)`,
+        transform: `translate(${x}px, ${y}px)`,
       }}
-      cx={layer.width / 2}
-      cy={layer.height / 2}
-      rx={layer.width / 2}
-      ry={layer.height / 2}
-      fill={layer.fill ? colorToCSS(layer.fill) : "#000"}
-      stroke={selectionColor || "transparent"}
-      strokeWidth={1}
+      cx={width / 2}
+      cy={height / 2}
+      rx={width / 2}
+      ry={height / 2}
+      fill={fill ? colorToCSS(fill) : "#000"}
+      stroke={selectionColor || (stroke ? colorToCSS(stroke) : "transparent")}
+      strokeWidth={selectionColor ? 1 : (strokeWidth || 0)}
     />
   );
 };

@@ -24,6 +24,8 @@ export type RectangleLayer = {
   height: number;
   width: number;
   fill: Color;
+  stroke?: Color;
+  strokeWidth?: number;
   value?: string;
 };
 
@@ -34,6 +36,8 @@ export type EllipseLayer = {
   height: number;
   width: number;
   fill: Color;
+  stroke?: Color;
+  strokeWidth?: number;
   value?: string;
 };
 
@@ -44,6 +48,8 @@ export type PathLayer = {
   height: number;
   width: number;
   fill: Color;
+  stroke?: Color;
+  strokeWidth?: number;
   points: number[][];
   value?: string;
 };

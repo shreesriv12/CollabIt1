@@ -35,6 +35,7 @@ export const LayerPreview = memo(
             y={layer.y}
             fill={layer.fill ? colorToCSS(layer.fill) : "#000"}
             stroke={selectionColor}
+            strokeWidth={layer.strokeWidth || 16}
           />
         );
       case LayerType.Note:

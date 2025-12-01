@@ -35,6 +35,7 @@ import {
 } from "@/types/canvas";
 
 import { CursorsPresence } from "./cursors-presence";
+import { DrawingTools } from "./drawing-tools";
 import { Info } from "./info";
 import { LayerPreview } from "./layer-preview";
 import { Participants } from "./participants";
@@ -64,6 +65,12 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     b: 0,
   });
   const [cursorPosition, setCursorPosition] = useState<Point | null>(null);
+  const [strokeWidth, setStrokeWidth] = useState<number>(2);
+  const [strokeColor, setStrokeColor] = useState<Color>({
+    r: 0,
+    g: 0,
+    b: 0,
+  });
 
   useDisableScrollBounce();
   const history = useHistory();
@@ -93,6 +100,8 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         height: 100,
         width: 100,
         fill: lastUsedColor,
+        stroke: strokeColor,
+        strokeWidth: strokeWidth,
       });
 
       liveLayerIds.push(layerId);
@@ -101,7 +110,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       setMyPresence({ selection: [layerId] }, { addToHistory: true });
       setCanvasState({ mode: CanvasMode.None });
     },
-    [lastUsedColor],
+    [lastUsedColor, strokeColor, strokeWidth],
   );
 
   const translateSelectedLayers = useMutation(
@@ -211,7 +220,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       const id = nanoid();
       liveLayers.set(
         id,
-        new LiveObject(penPointsToPathLayer(pencilDraft, lastUsedColor)),
+        new LiveObject(penPointsToPathLayer(pencilDraft, lastUsedColor, strokeColor, strokeWidth)),
       );
 
       const liveLayerIds = storage.get("layerIds");
@@ -220,7 +229,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       setMyPresence({ pencilDraft: null });
       setCanvasState({ mode: CanvasMode.Pencil });
     },
-    [lastUsedColor],
+    [lastUsedColor, strokeColor, strokeWidth],
   );
 
   const startDrawing = useMutation(
@@ -230,7 +239,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         penColor: lastUsedColor,
       });
     },
-    [lastUsedColor],
+    [lastUsedColor, strokeColor, strokeWidth],
   );
 
   const eraseLayer = useMutation(
@@ -492,6 +501,20 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         redo={history.redo}
       />
       <SelectionTools camera={camera} setLastUsedColor={setLastUsedColor} />
+      
+      {(canvasState.mode === CanvasMode.Pencil || 
+        (canvasState.mode === CanvasMode.Inserting && 
+         (canvasState.layerType === LayerType.Rectangle || 
+          canvasState.layerType === LayerType.Ellipse))) && (
+        <DrawingTools
+          strokeWidth={strokeWidth}
+          strokeColor={strokeColor}
+          fillColor={lastUsedColor}
+          onStrokeWidthChange={setStrokeWidth}
+          onStrokeColorChange={setStrokeColor}
+          onFillColorChange={setLastUsedColor}
+        />
+      )}
 
       <svg
         className={`h-[100vh] w-[100vw] ${
@@ -555,6 +578,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
             <Path
               points={pencilDraft}
               fill={colorToCSS(lastUsedColor)}
+              strokeWidth={strokeWidth}
               x={0}
               y={0}
             />
