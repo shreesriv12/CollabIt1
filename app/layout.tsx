@@ -4,6 +4,7 @@ import { Suspense } from "react";
 
 import { Loading } from "@/components/auth/loading";
 import { Toaster } from "@/components/ui/sonner";
+import { Toaster as UIToaster } from "@/components/ui/toaster";
 import { siteConfig } from "@/config";
 import { ConvexClientProvider } from "@/providers/convex-client-provider";
 import { ModalProvider } from "@/providers/modal-provider";
@@ -29,6 +30,7 @@ export default function RootLayout({
         <Suspense fallback={<Loading />}>
           <ConvexClientProvider>
             <Toaster theme="light" closeButton richColors />
+            <UIToaster />
             <ModalProvider />
             {children}
           </ConvexClientProvider>

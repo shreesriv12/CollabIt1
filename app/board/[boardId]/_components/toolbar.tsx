@@ -1,5 +1,6 @@
 import {
   Circle,
+  Database,
   Eraser,
   MousePointer2,
   Pencil,
@@ -29,6 +30,8 @@ type ToolbarProps = {
   setShowShapesToolbar: (show: boolean) => void;
   showFlowDiagram: boolean;
   setShowFlowDiagram: (show: boolean) => void;
+  showERDDiagram: boolean;
+  setShowERDDiagram: (show: boolean) => void;
 };
 
 export const Toolbar = ({
@@ -42,6 +45,8 @@ export const Toolbar = ({
   setShowShapesToolbar,
   showFlowDiagram,
   setShowFlowDiagram,
+  showERDDiagram,
+  setShowERDDiagram,
 }: ToolbarProps) => {
   const { open: openAIMindmapModal } = useAIMindmapModal();
 
@@ -140,6 +145,13 @@ export const Toolbar = ({
           icon={Workflow}
           onClick={() => setShowFlowDiagram(!showFlowDiagram)}
           isActive={showFlowDiagram}
+        />
+
+        <ToolButton
+          label="ERD Diagram"
+          icon={Database}
+          onClick={() => setShowERDDiagram(!showERDDiagram)}
+          isActive={showERDDiagram}
         />
 
         <ToolButton

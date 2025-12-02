@@ -37,6 +37,7 @@ import {
 import { CursorsPresence } from "./cursors-presence";
 import { DrawingTools } from "./drawing-tools";
 import { FlowDiagram } from "./flow-diagram";
+import { ERDToolbar } from "./erd-toolbar";
 import { Info } from "./info";
 import { LayerPreview } from "./layer-preview";
 import { Participants } from "./participants";
@@ -51,6 +52,11 @@ import { convertMindMapToLayers, findOptimalMindMapPosition, adjustMindMapPositi
 import { MindMapData } from "@/lib/ai-mindmap";
 import { MindMapConnection } from "./mindmap-connection";
 import { MindMapConnectionsRenderer } from "./mindmap-connections-renderer";
+import { SchemaExportModal } from "@/components/modals/schema-export-modal";
+import { ERDEntityModal } from "@/components/modals/erd-entity-modal";
+import { useSchemaExportModal } from "@/store/use-schema-export-modal";
+import { useERDEntityModal } from "@/store/use-erd-entity-modal";
+import { ERDConnectionPreview } from "./erd-connection-preview";
 
 const MAX_LAYERS = 100;
 const MULTISELECTION_THRESHOLD = 5;
@@ -81,12 +87,21 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   });
   const [showShapesToolbar, setShowShapesToolbar] = useState<boolean>(false);
   const [showFlowDiagram, setShowFlowDiagram] = useState<boolean>(false);
+  const [showERDDiagram, setShowERDDiagram] = useState<boolean>(false);
   const [isInserting, setIsInserting] = useState(false);
   const [insertionStart, setInsertionStart] = useState<Point | null>(null);
   const [currentPointer, setCurrentPointer] = useState<Point | null>(null);
+  
+  // ERD relationship state
+  const [erdConnectingFrom, setErdConnectingFrom] = useState<string | null>(null);
+  const [erdConnectionPreview, setErdConnectionPreview] = useState<Point | null>(null);
 
   // AI Mindmap modal state
   const { isOpen: isAIMindmapModalOpen, close: closeAIMindmapModal } = useAIMindmapModal();
+  
+  // ERD modal state
+  const { isOpen: isSchemaExportModalOpen, open: openSchemaExportModal, close: closeSchemaExportModal } = useSchemaExportModal();
+  const { isOpen: isERDEntityModalOpen } = useERDEntityModal();
 
   useDisableScrollBounce();
   const history = useHistory();
@@ -101,6 +116,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         | LayerType.Rectangle
         | LayerType.Text
         | LayerType.Note
+        | LayerType.ERDEntity
         | LayerType.Diamond
         | LayerType.Triangle
         | LayerType.Hexagon
@@ -142,29 +158,66 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         LayerType.Rectangle,
         LayerType.Text,
         LayerType.Note,
+        LayerType.ERDEntity,
       ].includes(layerType);
 
-      const layer = new LiveObject({
-        type: layerType,
-        x: position.x,
-        y: position.y,
-        height: 100,
-        width: 100,
-        fill: lastUsedColor,
-        stroke: strokeColor,
-        strokeWidth: strokeWidth,
-        ...(isAdvancedShape && { 
-          shapeType: layerType,
-          text: layerType === LayerType.UMLClass ? 'Class Name' :
-                layerType === LayerType.UMLInterface ? 'Interface Name' :
-                layerType === LayerType.UMLActor ? 'Actor' :
-                layerType === LayerType.UMLUseCase ? 'Use Case' :
-                layerType === LayerType.WireButton ? 'Button' :
-                layerType === LayerType.WireInput ? 'Input Field' :
-                layerType === LayerType.WireText ? 'Text Block' :
-                layerType === LayerType.WireCheckbox ? 'Checkbox' : ''
-        }),
-      });
+      let layer;
+
+      if (layerType === LayerType.ERDEntity) {
+        // Create ERD entity layer
+        layer = new LiveObject({
+          type: layerType,
+          x: position.x,
+          y: position.y,
+          height: 120,
+          width: 200,
+          fill: { r: 59, g: 130, b: 246 },
+          stroke: { r: 59, g: 130, b: 246 },
+          strokeWidth: 2,
+          entityData: {
+            id: layerId,
+            name: "NewEntity",
+            tableName: "new_entity",
+            fields: [
+              {
+                id: nanoid(),
+                name: "id",
+                type: "UUID",
+                isRequired: true,
+                isPrimaryKey: true,
+                isUnique: true,
+                isForeignKey: false,
+                defaultValue: "",
+                constraints: [],
+              }
+            ],
+            position: { x: position.x, y: position.y },
+          }
+        });
+      } else {
+        // Create regular layer
+        layer = new LiveObject({
+          type: layerType,
+          x: position.x,
+          y: position.y,
+          height: 100,
+          width: 100,
+          fill: lastUsedColor,
+          stroke: strokeColor,
+          strokeWidth: strokeWidth,
+          ...(isAdvancedShape && { 
+            shapeType: layerType,
+            text: layerType === LayerType.UMLClass ? 'Class Name' :
+                  layerType === LayerType.UMLInterface ? 'Interface Name' :
+                  layerType === LayerType.UMLActor ? 'Actor' :
+                  layerType === LayerType.UMLUseCase ? 'Use Case' :
+                  layerType === LayerType.WireButton ? 'Button' :
+                  layerType === LayerType.WireInput ? 'Input Field' :
+                  layerType === LayerType.WireText ? 'Text Block' :
+                  layerType === LayerType.WireCheckbox ? 'Checkbox' : ''
+          }),
+        });
+      }
 
       liveLayerIds.push(layerId);
       liveLayers.set(layerId, layer);
@@ -183,6 +236,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         | LayerType.Rectangle
         | LayerType.Text
         | LayerType.Note
+        | LayerType.ERDEntity
         | LayerType.Diamond
         | LayerType.Triangle
         | LayerType.Hexagon
@@ -226,29 +280,66 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         LayerType.Rectangle,
         LayerType.Text,
         LayerType.Note,
+        LayerType.ERDEntity,
       ].includes(layerType);
 
-      const layer = new LiveObject({
-        type: layerType,
-        x: position.x,
-        y: position.y,
-        height: height,
-        width: width,
-        fill: { r: 255, g: 255, b: 255, a: 0.1 }, // Transparent fill
-        stroke: strokeColor,
-        strokeWidth: strokeWidth,
-        ...(isAdvancedShape && { 
-          shapeType: layerType,
-          text: layerType === LayerType.UMLClass ? 'Class Name' :
-                layerType === LayerType.UMLInterface ? 'Interface Name' :
-                layerType === LayerType.UMLActor ? 'Actor' :
-                layerType === LayerType.UMLUseCase ? 'Use Case' :
-                layerType === LayerType.WireButton ? 'Button' :
-                layerType === LayerType.WireInput ? 'Input Field' :
-                layerType === LayerType.WireText ? 'Text Block' :
-                layerType === LayerType.WireCheckbox ? 'Checkbox' : ''
-        }),
-      });
+      let layer;
+
+      if (layerType === LayerType.ERDEntity) {
+        // Create ERD entity layer
+        layer = new LiveObject({
+          type: layerType,
+          x: position.x,
+          y: position.y,
+          height: Math.max(height, 120),
+          width: Math.max(width, 200),
+          fill: { r: 59, g: 130, b: 246 },
+          stroke: { r: 59, g: 130, b: 246 },
+          strokeWidth: 2,
+          entityData: {
+            id: layerId,
+            name: "NewEntity",
+            tableName: "new_entity", 
+            fields: [
+              {
+                id: nanoid(),
+                name: "id",
+                type: "UUID",
+                isRequired: true,
+                isPrimaryKey: true,
+                isUnique: true,
+                isForeignKey: false,
+                defaultValue: "",
+                constraints: [],
+              }
+            ],
+            position: { x: position.x, y: position.y },
+          }
+        });
+      } else {
+        // Create regular layer
+        layer = new LiveObject({
+          type: layerType,
+          x: position.x,
+          y: position.y,
+          height: height,
+          width: width,
+          fill: { r: 255, g: 255, b: 255, a: 0.1 }, // Transparent fill
+          stroke: strokeColor,
+          strokeWidth: strokeWidth,
+          ...(isAdvancedShape && { 
+            shapeType: layerType,
+            text: layerType === LayerType.UMLClass ? 'Class Name' :
+                  layerType === LayerType.UMLInterface ? 'Interface Name' :
+                  layerType === LayerType.UMLActor ? 'Actor' :
+                  layerType === LayerType.UMLUseCase ? 'Use Case' :
+                  layerType === LayerType.WireButton ? 'Button' :
+                  layerType === LayerType.WireInput ? 'Input Field' :
+                  layerType === LayerType.WireText ? 'Text Block' :
+                  layerType === LayerType.WireCheckbox ? 'Checkbox' : ''
+          }),
+        });
+      }
 
       liveLayerIds.push(layerId);
       liveLayers.set(layerId, layer);
@@ -257,6 +348,58 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       setCanvasState({ mode: CanvasMode.None });
     },
     [strokeColor, strokeWidth],
+  );
+
+  const createERDRelationship = useMutation(
+    ({ storage }, fromEntityId: string, toEntityId: string, relationshipType: string = "one-to-many") => {
+      const liveLayers = storage.get("layers");
+      const liveLayerIds = storage.get("layerIds");
+
+      if (liveLayers.size >= MAX_LAYERS) return;
+
+      const fromLayer = liveLayers.get(fromEntityId);
+      const toLayer = liveLayers.get(toEntityId);
+
+      if (!fromLayer || !toLayer) return;
+
+      // Get entity positions
+      const fromData = fromLayer.toObject();
+      const toData = toLayer.toObject();
+
+      // Calculate connection points (center of each entity)
+      const fromPoint = {
+        x: fromData.x + fromData.width / 2,
+        y: fromData.y + fromData.height / 2,
+      };
+
+      const toPoint = {
+        x: toData.x + toData.width / 2,
+        y: toData.y + toData.height / 2,
+      };
+
+      // Create relationship layer
+      const relationshipId = nanoid();
+      const relationshipLayer = new LiveObject({
+        type: LayerType.ERDRelationship,
+        fromEntityId: fromEntityId,
+        toEntityId: toEntityId,
+        relationshipType: relationshipType,
+        relationshipName: "",
+        fromField: "id",
+        toField: `${fromData.entityData?.tableName || 'entity'}_id`,
+        points: [fromPoint, toPoint],
+        stroke: { r: 100, g: 116, b: 139 },
+        strokeWidth: 2,
+        x: Math.min(fromPoint.x, toPoint.x),
+        y: Math.min(fromPoint.y, toPoint.y),
+        width: Math.abs(toPoint.x - fromPoint.x),
+        height: Math.abs(toPoint.y - fromPoint.y),
+      });
+
+      liveLayerIds.push(relationshipId);
+      liveLayers.set(relationshipId, relationshipLayer);
+    },
+    []
   );
 
   const insertMindMapLayers = useMutation(
@@ -298,6 +441,37 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   const handleMindMapGenerate = useCallback((mindMapData: MindMapData) => {
     insertMindMapLayers(mindMapData);
   }, [insertMindMapLayers]);
+
+  // Extract ERD entities and relationships from layers
+  const erdEntities = useStorage((root) => {
+    const entities: any[] = [];
+    root.layerIds.forEach((id) => {
+      const layer = root.layers.get(id);
+      if (layer && layer.type === LayerType.ERDEntity && layer.entityData) {
+        entities.push(layer.entityData);
+      }
+    });
+    return entities;
+  }) || [];
+
+  const erdRelationships = useStorage((root) => {
+    const relationships: any[] = [];
+    root.layerIds.forEach((id) => {
+      const layer = root.layers.get(id);
+      if (layer && layer.type === LayerType.ERDRelationship) {
+        relationships.push({
+          id,
+          fromEntityId: layer.fromEntityId,
+          toEntityId: layer.toEntityId,
+          type: layer.relationshipType || 'one-to-many',
+          fromField: layer.fromField || 'id',
+          toField: layer.toField || 'foreign_key',
+          name: layer.relationshipName || '',
+        });
+      }
+    });
+    return relationships;
+  }) || [];
 
   const translateSelectedLayers = useMutation(
     ({ storage, self }, point: Point) => {
@@ -515,6 +689,8 @@ export const Canvas = ({ boardId }: CanvasProps) => {
 
       if (canvasState.mode === CanvasMode.Inserting && isInserting) {
         setCurrentPointer(current);
+      } else if (canvasState.mode === CanvasMode.ERDConnecting && erdConnectingFrom) {
+        setErdConnectionPreview(current);
       } else if (canvasState.mode === CanvasMode.Pressing) {
         startMultiSelection(current, canvasState.origin);
       } else if (canvasState.mode === CanvasMode.SelectionNet) {
@@ -563,6 +739,13 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         setIsInserting(true);
         setInsertionStart(point);
         setCurrentPointer(point);
+        return;
+      }
+
+      if (canvasState.mode === CanvasMode.ERDConnecting) {
+        // Cancel connection on empty space click
+        setErdConnectingFrom(null);
+        setErdConnectionPreview(null);
         return;
       }
 
@@ -646,12 +829,35 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   const selections = useOthersMapped((other) => other.presence.selection);
 
   const onLayerPointerDown = useMutation(
-    ({ self, setMyPresence }, e: React.PointerEvent, layerId: string) => {
+    ({ self, setMyPresence, storage }, e: React.PointerEvent, layerId: string) => {
       if (
         canvasState.mode === CanvasMode.Pencil ||
         canvasState.mode === CanvasMode.Inserting
       )
         return;
+
+      // Handle ERD relationship creation
+      if (canvasState.mode === CanvasMode.ERDConnecting) {
+        e.stopPropagation();
+        
+        const liveLayers = storage.get("layers");
+        const layer = liveLayers.get(layerId);
+        
+        // Only connect to ERD entities
+        if (layer && layer.get("type") === LayerType.ERDEntity) {
+          if (!erdConnectingFrom) {
+            // Start connection from this entity
+            setErdConnectingFrom(layerId);
+          } else if (erdConnectingFrom !== layerId) {
+            // Complete connection to this entity
+            createERDRelationship(erdConnectingFrom, layerId, "one-to-many");
+            setErdConnectingFrom(null);
+            setErdConnectionPreview(null);
+            setCanvasState({ mode: CanvasMode.None });
+          }
+        }
+        return;
+      }
 
       history.pause();
       e.stopPropagation();
@@ -664,7 +870,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
 
       setCanvasState({ mode: CanvasMode.Translating, current: point });
     },
-    [setCanvasState, camera, history, canvasState.mode],
+    [setCanvasState, camera, history, canvasState.mode, erdConnectingFrom, createERDRelationship],
   );
 
   const layerIdsToColorSelection = useMemo(() => {
@@ -686,6 +892,14 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       switch (e.key) {
+        case "Escape":
+          // Cancel ERD connection mode
+          if (canvasState.mode === CanvasMode.ERDConnecting) {
+            setErdConnectingFrom(null);
+            setErdConnectionPreview(null);
+            setCanvasState({ mode: CanvasMode.None });
+          }
+          break;
         case "z":
           if (e.ctrlKey || e.metaKey) {
             if (e.shiftKey || e.altKey) history.redo();
@@ -701,7 +915,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     return () => {
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [deleteLayers, history]);
+  }, [deleteLayers, history, canvasState.mode]);
 
   useEffect(() => {
     if (canvasState.mode !== CanvasMode.Eraser) {
@@ -724,6 +938,8 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         setShowShapesToolbar={setShowShapesToolbar}
         showFlowDiagram={showFlowDiagram}
         setShowFlowDiagram={setShowFlowDiagram}
+        showERDDiagram={showERDDiagram}
+        setShowERDDiagram={setShowERDDiagram}
       />
       
       {showShapesToolbar && (
@@ -732,6 +948,13 @@ export const Canvas = ({ boardId }: CanvasProps) => {
           setCanvasState={setCanvasState}
         />
       )}
+      
+      <ERDToolbar
+        canvasState={canvasState}
+        setCanvasState={setCanvasState}
+        onExportSchema={openSchemaExportModal}
+        isVisible={showERDDiagram}
+      />
       <SelectionTools camera={camera} setLastUsedColor={setLastUsedColor} />
       
       {(canvasState.mode === CanvasMode.Pencil || 
@@ -752,6 +975,8 @@ export const Canvas = ({ boardId }: CanvasProps) => {
             ? "cursor-crosshair"
             : canvasState.mode === CanvasMode.Eraser
             ? "cursor-none"
+            : canvasState.mode === CanvasMode.ERDConnecting
+            ? "cursor-crosshair"
             : ""
         }`}
         onWheel={onWheel}
@@ -846,6 +1071,14 @@ export const Canvas = ({ boardId }: CanvasProps) => {
               })()}
             </g>
           )}
+          
+          {/* ERD relationship connection preview */}
+          {canvasState.mode === CanvasMode.ERDConnecting && erdConnectingFrom && erdConnectionPreview && (
+            <ERDConnectionPreview 
+              fromLayerId={erdConnectingFrom}
+              toPoint={erdConnectionPreview}
+            />
+          )}
         </g>
       </svg>
       
@@ -861,6 +1094,16 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         onClose={closeAIMindmapModal}
         onGenerate={handleMindMapGenerate}
       />
+      
+      {/* ERD Modals */}
+      <SchemaExportModal
+        isOpen={isSchemaExportModalOpen}
+        onClose={closeSchemaExportModal}
+        entities={erdEntities}
+        relationships={erdRelationships}
+      />
+      
+      <ERDEntityModal />
     </main>
   );
 };

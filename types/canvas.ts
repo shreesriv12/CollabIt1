@@ -16,6 +16,8 @@ export enum LayerType {
   Text,
   Note,
   MindMapNode,
+  ERDEntity,
+  ERDRelationship,
   Diamond,
   Triangle,
   Hexagon,
@@ -137,6 +139,50 @@ export type AdvancedShapeLayer = {
   value?: string;
 };
 
+export type ERDEntityLayer = {
+  type: LayerType.ERDEntity;
+  x: number;
+  y: number;
+  height: number;
+  width: number;
+  fill: Color;
+  stroke?: Color;
+  strokeWidth?: number;
+  // ERD specific properties
+  erdEntityId: string;
+  tableName: string;
+  fields: Array<{
+    id: string;
+    name: string;
+    type: string;
+    isPrimaryKey: boolean;
+    isForeignKey: boolean;
+    isRequired: boolean;
+    isUnique: boolean;
+    defaultValue?: string;
+  }>;
+};
+
+export type ERDRelationshipLayer = {
+  type: LayerType.ERDRelationship;
+  x: number;
+  y: number;
+  height: number;
+  width: number;
+  fill: Color;
+  stroke?: Color;
+  strokeWidth?: number;
+  // ERD relationship properties
+  erdRelationshipId: string;
+  fromEntityId: string;
+  toEntityId: string;
+  relationshipType: 'one-to-one' | 'one-to-many' | 'many-to-many';
+  fromField: string;
+  toField: string;
+  relationshipName?: string;
+  points: Point[];
+};
+
 export type Point = {
   x: number;
   y: number;
@@ -188,6 +234,15 @@ export type CanvasState =
       origin: Point;
     }
   | {
+      mode: CanvasMode.ERD;
+    }
+  | {
+      mode: CanvasMode.ERDConnecting;
+      fromEntityId: string;
+      origin: Point;
+      current?: Point;
+    }
+  | {
       mode: CanvasMode.Resizing;
       initialBounds: XYWH;
       corner: Side;
@@ -202,6 +257,8 @@ export enum CanvasMode {
   Resizing,
   Pencil,
   Eraser,
+  ERD,
+  ERDConnecting,
 }
 
 export type Layer =
@@ -211,4 +268,6 @@ export type Layer =
   | TextLayer
   | NoteLayer
   | MindMapNodeLayer
+  | ERDEntityLayer
+  | ERDRelationshipLayer
   | AdvancedShapeLayer;

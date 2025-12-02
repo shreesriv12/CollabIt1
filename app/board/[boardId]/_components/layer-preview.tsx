@@ -13,6 +13,8 @@ import { Text } from "./text";
 import { Path } from "./path";
 import { AdvancedShape } from "./advanced-shape";
 import { MindMapNode } from "./mindmap-node";
+import { ERDEntity } from "./erd-entity";
+import { ERDRelationship } from "./erd-relationship";
 
 type LayerPreviewProps = {
   id: string;
@@ -79,6 +81,24 @@ export const LayerPreview = memo(
       case LayerType.MindMapNode:
         return (
           <MindMapNode
+            id={id}
+            layer={layer}
+            onPointerDown={onLayerPointerDown}
+            selectionColor={selectionColor}
+          />
+        );
+      case LayerType.ERDEntity:
+        return (
+          <ERDEntity
+            id={id}
+            layer={layer}
+            onPointerDown={onLayerPointerDown}
+            selectionColor={selectionColor}
+          />
+        );
+      case LayerType.ERDRelationship:
+        return (
+          <ERDRelationship
             id={id}
             layer={layer}
             onPointerDown={onLayerPointerDown}
