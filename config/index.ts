@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const siteConfig: Metadata = {
-  title: "Miro Clone",
+  title: "collabX",
   description:
-    "Revolutionary Miro clone: Real-time collaboration, versatile canvas, rich media, secure.",
+    "Revolutionary collabX: Real-time collaboration, versatile canvas, rich media, secure.",
   keywords: [
     "reactjs",
     "nextjs",

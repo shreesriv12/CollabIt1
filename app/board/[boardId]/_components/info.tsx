@@ -50,7 +50,7 @@ export const Info = ({ boardId }: InfoProps) => {
                 font.className,
               )}
             >
-              Miro
+              collabX
             </span>
           </Link>
         </Button>
