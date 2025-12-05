@@ -233,11 +233,7 @@ LIVEBLOCKS_SECRET_KEY=sk_dev_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 ## :camera: Screenshots
 
-![Modern UI/UX](/.github/images/img1.png "Modern UI/UX")
 
-![Create New Boards](/.github/images/img2.png "Create New Boards")
-
-![Rename Boards](/.github/images/img3.png "Rename Boards")
 
 ## :gear: Tech Stack
 
