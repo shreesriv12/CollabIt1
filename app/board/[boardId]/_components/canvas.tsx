@@ -78,6 +78,9 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     g: 0,
     b: 0,
   });
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState<Point | null>(null);
+  const [isSpacePressed, setIsSpacePressed] = useState(false);
   const [cursorPosition, setCursorPosition] = useState<Point | null>(null);
   const [strokeWidth, setStrokeWidth] = useState<number>(2);
   const [strokeColor, setStrokeColor] = useState<Color>({
@@ -685,6 +688,18 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     ({ setMyPresence }, e: React.PointerEvent) => {
       e.preventDefault();
 
+      // Handle panning
+      if (isPanning && panStart) {
+        const deltaX = e.clientX - panStart.x;
+        const deltaY = e.clientY - panStart.y;
+        setCamera((prev) => ({
+          x: prev.x + deltaX,
+          y: prev.y + deltaY,
+        }));
+        setPanStart({ x: e.clientX, y: e.clientY });
+        return;
+      }
+
       const current = pointerEventToCanvasPoint(e, camera);
 
       if (canvasState.mode === CanvasMode.Inserting && isInserting) {
@@ -721,6 +736,9 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       translateSelectedLayers,
       eraseLayer,
       isInserting,
+      isPanning,
+      panStart,
+      erdConnectingFrom,
     ],
   );
 
@@ -734,6 +752,14 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
       const point = pointerEventToCanvasPoint(e, camera);
+
+      // Start panning with spacebar + left click or middle mouse button
+      if (isSpacePressed || e.button === 1) {
+        e.preventDefault();
+        setIsPanning(true);
+        setPanStart({ x: e.clientX, y: e.clientY });
+        return;
+      }
 
       if (canvasState.mode === CanvasMode.Inserting) {
         setIsInserting(true);
@@ -761,11 +787,18 @@ export const Canvas = ({ boardId }: CanvasProps) => {
 
       setCanvasState({ origin: point, mode: CanvasMode.Pressing });
     },
-    [camera, canvasState.mode, setCanvasState, startDrawing, eraseLayer],
+    [camera, canvasState.mode, setCanvasState, startDrawing, eraseLayer, isSpacePressed],
   );
 
   const onPointerUp = useMutation(
     ({}, e) => {
+      // Stop panning
+      if (isPanning) {
+        setIsPanning(false);
+        setPanStart(null);
+        return;
+      }
+
       const point = pointerEventToCanvasPoint(e, camera);
 
       if (canvasState.mode === CanvasMode.Inserting && isInserting && insertionStart && currentPointer) {
@@ -823,6 +856,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       isInserting,
       insertionStart,
       currentPointer,
+      isPanning,
     ],
   );
 
@@ -892,6 +926,13 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       switch (e.key) {
+        case " ":
+          // Enable panning mode with spacebar
+          if (!isSpacePressed) {
+            e.preventDefault();
+            setIsSpacePressed(true);
+          }
+          break;
         case "Escape":
           // Cancel ERD connection mode
           if (canvasState.mode === CanvasMode.ERDConnecting) {
@@ -910,12 +951,22 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       }
     }
 
+    function onKeyUp(e: KeyboardEvent) {
+      if (e.key === " ") {
+        setIsSpacePressed(false);
+        setIsPanning(false);
+        setPanStart(null);
+      }
+    }
+
     document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
 
     return () => {
       document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("keyup", onKeyUp);
     };
-  }, [deleteLayers, history, canvasState.mode]);
+  }, [deleteLayers, history, canvasState.mode, isSpacePressed]);
 
   useEffect(() => {
     if (canvasState.mode !== CanvasMode.Eraser) {
@@ -971,7 +1022,11 @@ export const Canvas = ({ boardId }: CanvasProps) => {
 
       <svg
         className={`h-[100vh] w-[100vw] ${
-          canvasState.mode === CanvasMode.Pencil
+          isPanning
+            ? "cursor-grabbing"
+            : isSpacePressed
+            ? "cursor-grab"
+            : canvasState.mode === CanvasMode.Pencil
             ? "cursor-crosshair"
             : canvasState.mode === CanvasMode.Eraser
             ? "cursor-none"
