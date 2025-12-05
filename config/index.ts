@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 
 export const siteConfig: Metadata = {
-  title: "collabX",
+  title: "CollabIt",
   description:
-    "Revolutionary collabX: Real-time collaboration, versatile canvas, rich media, secure.",
+    "Revolutionary CollabIt: Real-time collaboration, versatile canvas, rich media, secure.",
   keywords: [
     "reactjs",
     "nextjs",
     "vercel",
     "react",
-    "miro",
+    "collabit",
     "board",
     "shadcn",
     "shadcn-ui",
@@ -40,11 +40,11 @@ export const siteConfig: Metadata = {
     "css",
   ] as Array<string>,
   authors: {
-    name: "Sanidhya Kumar Verma",
-    url: "https://github.com/sanidhyy",
+    name: "Krishna Mittal",
+    url: "https://github.com/krishnaMittal23",
   },
 } as const;
 
 export const links = {
-  sourceCode: "https://github.com/sanidhyy/miro-clone",
+  sourceCode: "https://github.com/krishnaMittal23/CollabIt",
 } as const;

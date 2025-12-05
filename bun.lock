@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "miro-clone",
+      "name": "collabit",
       "dependencies": {
         "@clerk/nextjs": "^4.31.5",
         "@liveblocks/client": "^1.10.1",
