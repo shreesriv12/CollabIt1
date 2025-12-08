@@ -39,6 +39,8 @@ Table of contents
 
 ---
 
+
+
 ## Overview
 
 CollabIt provides a fast, collaborative workspace combining:
@@ -72,6 +74,32 @@ planning, and sharing interactive diagrams and boards in real time.
     business logic.
 - Uploads / Drive integration
   - Google Drive upload modal and a central uploads route (optional).
+
+
+ ## Screenshots
+ <img width="1842" height="941" alt="image" src="https://github.com/user-attachments/assets/8a982db6-8bbf-4174-abf2-b34c61143c7d" />
+
+ <img width="1860" height="935" alt="image" src="https://github.com/user-attachments/assets/777bbb7c-9461-4aa7-afea-87a3efcfe681" />
+
+<img width="1862" height="943" alt="image" src="https://github.com/user-attachments/assets/ed4ce28d-702a-4450-bfae-25f22a41911b" />
+
+<img width="1868" height="929" alt="image" src="https://github.com/user-attachments/assets/e1e86041-3f18-40bc-a9a3-0844e11db2e7" />
+
+<img width="1863" height="928" alt="image" src="https://github.com/user-attachments/assets/43bd8bd3-82aa-4036-9867-74eea4eb60dd" />
+
+<img width="1860" height="939" alt="image" src="https://github.com/user-attachments/assets/0c6db445-c766-436d-bd8f-24daf91844e2" />
+
+
+## Project Demo
+
+
+https://github.com/user-attachments/assets/bdbf08f0-1982-4663-bb32-a7b8547bb6ba
+
+
+
+https://github.com/user-attachments/assets/39a4b543-f72c-49c3-b272-f699ed545a1b
+
+
 
 ## Architecture & Tech Stack
 
