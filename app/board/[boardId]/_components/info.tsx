@@ -50,7 +50,7 @@ export const Info = ({ boardId }: InfoProps) => {
                 font.className,
               )}
             >
-              collabX
+              collabIt
             </span>
           </Link>
         </Button>

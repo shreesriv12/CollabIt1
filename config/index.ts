@@ -4,6 +4,11 @@ export const siteConfig: Metadata = {
   title: "CollabIt",
   description:
     "Revolutionary CollabIt: Real-time collaboration, versatile canvas, rich media, secure.",
+  icons: {
+    icon: "/logo.svg",
+    shortcut: "/logo.svg",
+    apple: "/logo.svg",
+  },
   keywords: [
     "reactjs",
     "nextjs",

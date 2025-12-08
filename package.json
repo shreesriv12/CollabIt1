@@ -10,6 +10,9 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^4.31.5",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@liveblocks/client": "^1.10.1",
     "@liveblocks/node": "^1.10.1",
     "@liveblocks/react": "^1.10.1",
@@ -51,6 +54,7 @@
     "react-dom": "^18",
     "react-loading": "^2.0.3",
     "reactflow": "^11.11.4",
+    "recordrtc": "^5.6.2",
     "sonner": "^1.4.0",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",

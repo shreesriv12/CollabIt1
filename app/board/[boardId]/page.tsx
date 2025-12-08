@@ -1,4 +1,4 @@
-import { Canvas } from "./_components/canvas";
+import { BoardView } from "./_components/board-view";
 import { Room } from "@/components/room";
 
 import { Loading } from "./_components/loading";
@@ -12,7 +12,7 @@ type BoardIdPageProps = {
 const BoardIdPage = ({ params }: BoardIdPageProps) => {
   return (
     <Room roomId={params.boardId} fallback={<Loading />}>
-      <Canvas boardId={params.boardId} />
+      <BoardView boardId={params.boardId} />
     </Room>
   );
 };
