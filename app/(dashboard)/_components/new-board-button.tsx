@@ -35,10 +35,10 @@ export const NewBoardButton = ({ orgId, disabled }: NewBoardButtonProps) => {
       aria-disabled={pending || disabled}
       onClick={onClick}
       className={cn(
-        "col-span-1 aspect-[100/127] bg-blue-600 rounded-lg flex flex-col items-center justify-center py-6",
+        "col-span-1 aspect-[100/127] bg-gradient-to-br from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 rounded-lg flex flex-col items-center justify-center py-6 border-2 border-dashed border-blue-300 dark:border-blue-700 shadow-lg",
         pending || disabled
           ? "opacity-75 cursor-not-allowed"
-          : "hover:bg-blue-800",
+          : "hover:from-blue-700 hover:to-purple-700 dark:hover:from-blue-600 dark:hover:to-purple-600 hover:scale-105 hover:shadow-xl transition-all duration-300 hover:-translate-y-1",
       )}
     >
       <div aria-hidden />

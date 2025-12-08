@@ -9,7 +9,7 @@ import Image from "next/image";
 
 export const Sidebar = () => {
   return (
-    <aside className="fixed z-[1] left-0 bg-blue-950 h-full w-[60px] flex p-3 flex-col justify-between text-white">
+    <aside className="fixed z-[1] left-0 bg-blue-950 dark:bg-neutral-900 h-full w-[60px] flex p-3 flex-col justify-between text-white border-r border-blue-900 dark:border-neutral-800">
       <div className="flex flex-col gap-y-4">
         <List />
       </div>

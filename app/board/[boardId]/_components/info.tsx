@@ -11,17 +11,26 @@ import { toast } from "sonner";
 
 import { Actions } from "@/components/actions";
 import { Hint } from "@/components/hint";
-import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
+<<<<<<< HEAD
+import { ThemeToggle } from "@/components/theme-toggle";
+=======
+import { Skeleton } from "@/components/ui/skeleton";
+>>>>>>> origin/main
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { useRenameModal } from "@/store/use-rename-modal";
 import { exportCanvas } from "../../../../lib/pdfexport";
 
+<<<<<<< HEAD
 const TabSeparator = () => (
   <div className="text-neutral-300 dark:text-neutral-600 px-1.5 transition-colors">|</div>
 );
+=======
+const TabSeparator = () => <div className="text-neutral-300 dark:text-neutral-600 px-1.5">|</div>;
+>>>>>>> origin/main
 
 const font = Poppins({
   subsets: ["latin"],
@@ -56,6 +65,7 @@ export const Info = ({ boardId }: InfoProps) => {
   if (!data) return <InfoSkeleton />;
 
   return (
+<<<<<<< HEAD
     <div className="absolute top-4 left-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl px-3 h-14 flex items-center shadow-lg shadow-black/5 dark:shadow-black/20 gap-2 border border-neutral-200/50 dark:border-neutral-700/50 transition-all hover:shadow-xl">
       <Hint label="Go to boards" side="bottom" sideOffset={10}>
         <Button 
@@ -77,10 +87,25 @@ export const Info = ({ boardId }: InfoProps) => {
             <span
               className={cn(
                 "font-semibold text-xl bg-gradient-to-r from-neutral-900 to-neutral-600 dark:from-neutral-100 dark:to-neutral-400 bg-clip-text text-transparent",
+=======
+    <div className="absolute top-2 left-2 bg-white dark:bg-neutral-800 rounded-lg px-2 h-12 flex items-center shadow-lg border border-gray-200 dark:border-neutral-700 z-30">
+      <Hint label="Go to boards" side="bottom" sideOffset={10}>
+        <Button variant="board" className="px-2" asChild>
+          <Link href="/">
+            <Image
+              src="/logo.svg"
+              alt="CollabIt Logo"
+              height={40}
+              width={40}
+            />
+            <span
+              className={cn(
+                "font-semibold text-xl ml-2 text-black dark:text-white",
+>>>>>>> origin/main
                 font.className,
               )}
             >
-              collabX
+              collabIt
             </span>
           </Link>
         </Button>
@@ -152,6 +177,10 @@ export const Info = ({ boardId }: InfoProps) => {
           </Hint>
         </div>
       </Actions>
+
+      <TabSeparator />
+
+      <ThemeToggle />
     </div>
   );
 };
@@ -159,6 +188,7 @@ export const Info = ({ boardId }: InfoProps) => {
 export const InfoSkeleton = () => {
   return (
     <div
+<<<<<<< HEAD
       className="w-[350px] absolute top-4 left-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl px-3 h-14 flex items-center shadow-lg border border-neutral-200/50 dark:border-neutral-700/50 animate-pulse"
       aria-hidden
     >
@@ -288,6 +318,20 @@ export const EnhancedDrawingTools = ({
         </label>
         <ColorPicker onChange={onFillColorChange} />
       </div>
+=======
+      className="w-[300px] absolute top-2 left-2 bg-white dark:bg-neutral-800 rounded-lg px-3 h-12 flex items-center shadow-lg border border-gray-200 dark:border-neutral-700 z-30"
+      aria-hidden
+    >
+      <div className="flex items-center gap-3 w-full">
+        <Skeleton className="h-8 w-8 rounded-full" />
+        <div className="flex-1">
+          <Skeleton className="h-4 w-40 rounded-md" />
+        </div>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-8 w-8 rounded-md" />
+        </div>
+      </div>
+>>>>>>> origin/main
     </div>
   );
 };

@@ -29,9 +29,9 @@ export const Ellipse = ({
       cy={height / 2}
       rx={width / 2}
       ry={height / 2}
-      fill={fill ? colorToCSS(fill) : "#000"}
-      stroke={selectionColor || (stroke ? colorToCSS(stroke) : "transparent")}
-      strokeWidth={selectionColor ? 1 : (strokeWidth || 0)}
+      fill={fill ? colorToCSS(fill) : "#CCC"}
+      stroke={selectionColor || (stroke ? colorToCSS(stroke) : "#666")}
+      strokeWidth={selectionColor ? 1 : (strokeWidth || 2)}
     />
   );
 };

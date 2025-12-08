@@ -1,6 +1,6 @@
-# 🚀 Miro Clone Setup Guide
+# 🚀 CollabIt Setup Guide
 
-This guide will help you set up the Miro Clone project with all necessary dependencies and environment configurations.
+This guide will help you set up the CollabIt project with all necessary dependencies and environment configurations.
 
 ## 📋 Prerequisites
 
@@ -41,7 +41,7 @@ Before setting up the project, make sure you have:
 
 ```bash
 # Navigate to the project directory
-cd miro-clone-main
+cd CollabIt
 
 # Install dependencies
 npm install

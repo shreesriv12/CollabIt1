@@ -32,7 +32,7 @@
 Here is the folder structure of this app.
 
 ```bash
-miro-clone/
+CollabIt/
   |- app/
     |-- (dashboard)/
         |--- _components/

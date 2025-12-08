@@ -61,8 +61,8 @@ export const BoardCard = ({
 
   return (
     <Link href={`/board/${id}`}>
-      <div className="group aspect-[100/127] border rounded-lg flex flex-col justify-between overflow-hidden">
-        <div className="relative flex-1 bg-amber-50">
+      <div className="group aspect-[100/127] border border-gray-200 dark:border-neutral-700 rounded-lg flex flex-col justify-between overflow-hidden hover:shadow-xl hover:scale-105 hover:-translate-y-1 transition-all duration-300 bg-white dark:bg-neutral-800">
+        <div className="relative flex-1 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30">
           <Image src={imageUrl} alt={title} fill className="object-fit" />
           <Overlay />
           <Actions id={id} title={title} side="right">

@@ -1,4 +1,4 @@
-# Code of Conduct - Miro Clone
+# Code of Conduct - CollabIt
 
 ## Our Pledge
 

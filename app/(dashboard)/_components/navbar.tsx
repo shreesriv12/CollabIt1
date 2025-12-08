@@ -14,7 +14,7 @@ export const Navbar = () => {
   const { organization, membership } = useOrganization();
 
   return (
-    <div className="flex items-center gap-x-4 p-5">
+    <div className="flex items-center gap-x-4 p-5 bg-white dark:bg-neutral-900 border-b border-gray-200 dark:border-neutral-800">
       <div className="hidden lg:flex lg:flex-1">
         <SearchInput />
       </div>

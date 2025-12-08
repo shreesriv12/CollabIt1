@@ -23,9 +23,9 @@ export const OrgSidebar = () => {
     <div className="hidden lg:flex flex-col space-y-6 w-[206px] pl-5 pt-5">
       <Link href="/">
         <div className="flex items-center gap-x-2">
-          <Image src="/logo.svg" alt="Miro Clone Logo" height={60} width={60} />
-          <span className={cn("font-semibold text-2xl", font.className)}>
-            collabX
+          <Image src="/logo.svg" alt="CollabIt Logo" height={60} width={60} />
+          <span className={cn("font-semibold text-2xl text-gray-900 dark:text-white", font.className)}>
+            collabIt
           </span>
         </div>
       </Link>
@@ -44,9 +44,10 @@ export const OrgSidebar = () => {
               padding: "6px",
               width: "100%",
               borderRadius: "8px",
-              border: "1px solid #E5E7EB",
+              border: "1px solid var(--border)",
               justifyContent: "space-between",
-              backgroundColor: "white",
+              backgroundColor: "var(--background)",
+              color: "var(--foreground)",
             },
             organizationSwitcherPopoverActionButton__createOrganization: {
               display: "none",

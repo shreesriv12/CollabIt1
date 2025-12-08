@@ -2,7 +2,7 @@
 
 import { LiveObject } from "@liveblocks/client";
 import { nanoid } from "nanoid";
-import React, { useCallback, useMemo, useState, useEffect } from "react";
+import React, { useCallback, useMemo, useState, useEffect, useRef } from "react";
 
 import { useDisableScrollBounce } from "@/hooks/use-disable-scroll-bounce";
 import { useDeleteLayers } from "@/hooks/use-delete-layers";
@@ -74,16 +74,19 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   });
   const [camera, setCamera] = useState<Camera>({ x: 0, y: 0 });
   const [lastUsedColor, setLastUsedColor] = useState<Color>({
-    r: 0,
-    g: 0,
-    b: 0,
+    r: 255,
+    g: 255,
+    b: 255,
   });
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState<Point | null>(null);
+  const [isSpacePressed, setIsSpacePressed] = useState(false);
   const [cursorPosition, setCursorPosition] = useState<Point | null>(null);
   const [strokeWidth, setStrokeWidth] = useState<number>(2);
   const [strokeColor, setStrokeColor] = useState<Color>({
-    r: 0,
-    g: 0,
-    b: 0,
+    r: 255,
+    g: 255,
+    b: 255,
   });
   const [showShapesToolbar, setShowShapesToolbar] = useState<boolean>(false);
   const [showFlowDiagram, setShowFlowDiagram] = useState<boolean>(false);
@@ -402,6 +405,35 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     []
   );
 
+  const insertImageLayer = useMutation(
+    ({ storage, setMyPresence }, position: Point, width: number, height: number, image: { url: string; type: string; name?: string }) => {
+      const liveLayers = storage.get("layers");
+      if (liveLayers.size >= MAX_LAYERS) return;
+
+      const liveLayerIds = storage.get("layerIds");
+      const layerId = nanoid();
+
+      const layer = new LiveObject({
+        type: LayerType.WireImage,
+        x: position.x,
+        y: position.y,
+        width,
+        height,
+        fill: { r: 255, g: 255, b: 255, a: 0.1 },
+        stroke: strokeColor,
+        strokeWidth: strokeWidth,
+        image, // store image metadata (url, type, name)
+      });
+
+      liveLayerIds.push(layerId);
+      liveLayers.set(layerId, layer);
+
+      setMyPresence({ selection: [layerId] }, { addToHistory: true });
+      setCanvasState({ mode: CanvasMode.None });
+    },
+    [strokeColor, strokeWidth],
+  );
+
   const insertMindMapLayers = useMutation(
     ({ storage, setMyPresence }, mindMapData: MindMapData) => {
       const liveLayers = storage.get("layers");
@@ -685,6 +717,18 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     ({ setMyPresence }, e: React.PointerEvent) => {
       e.preventDefault();
 
+      // Handle panning
+      if (isPanning && panStart) {
+        const deltaX = e.clientX - panStart.x;
+        const deltaY = e.clientY - panStart.y;
+        setCamera((prev) => ({
+          x: prev.x + deltaX,
+          y: prev.y + deltaY,
+        }));
+        setPanStart({ x: e.clientX, y: e.clientY });
+        return;
+      }
+
       const current = pointerEventToCanvasPoint(e, camera);
 
       if (canvasState.mode === CanvasMode.Inserting && isInserting) {
@@ -721,6 +765,9 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       translateSelectedLayers,
       eraseLayer,
       isInserting,
+      isPanning,
+      panStart,
+      erdConnectingFrom,
     ],
   );
 
@@ -734,6 +781,14 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
       const point = pointerEventToCanvasPoint(e, camera);
+
+      // Start panning with spacebar + left click or middle mouse button
+      if (isSpacePressed || e.button === 1) {
+        e.preventDefault();
+        setIsPanning(true);
+        setPanStart({ x: e.clientX, y: e.clientY });
+        return;
+      }
 
       if (canvasState.mode === CanvasMode.Inserting) {
         setIsInserting(true);
@@ -761,11 +816,18 @@ export const Canvas = ({ boardId }: CanvasProps) => {
 
       setCanvasState({ origin: point, mode: CanvasMode.Pressing });
     },
-    [camera, canvasState.mode, setCanvasState, startDrawing, eraseLayer],
+    [camera, canvasState.mode, setCanvasState, startDrawing, eraseLayer, isSpacePressed],
   );
 
   const onPointerUp = useMutation(
     ({}, e) => {
+      // Stop panning
+      if (isPanning) {
+        setIsPanning(false);
+        setPanStart(null);
+        return;
+      }
+
       const point = pointerEventToCanvasPoint(e, camera);
 
       if (canvasState.mode === CanvasMode.Inserting && isInserting && insertionStart && currentPointer) {
@@ -823,6 +885,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       isInserting,
       insertionStart,
       currentPointer,
+      isPanning,
     ],
   );
 
@@ -892,6 +955,13 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       switch (e.key) {
+        case " ":
+          // Enable panning mode with spacebar
+          if (!isSpacePressed) {
+            e.preventDefault();
+            setIsSpacePressed(true);
+          }
+          break;
         case "Escape":
           // Cancel ERD connection mode
           if (canvasState.mode === CanvasMode.ERDConnecting) {
@@ -910,12 +980,22 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       }
     }
 
+    function onKeyUp(e: KeyboardEvent) {
+      if (e.key === " ") {
+        setIsSpacePressed(false);
+        setIsPanning(false);
+        setPanStart(null);
+      }
+    }
+
     document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
 
     return () => {
       document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("keyup", onKeyUp);
     };
-  }, [deleteLayers, history, canvasState.mode]);
+  }, [deleteLayers, history, canvasState.mode, isSpacePressed]);
 
   useEffect(() => {
     if (canvasState.mode !== CanvasMode.Eraser) {
@@ -923,8 +1003,78 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     }
   }, [canvasState.mode]);
 
+  // Prevent accidental browser back/forward navigation on horizontal swipes
+  // by disabling overscroll and intercepting horizontal touch gestures.
+  const mainRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const el = mainRef.current;
+    if (!el || typeof window === "undefined") return;
+
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+
+    function onTouchStart(e: TouchEvent) {
+      if (!e.touches || e.touches.length === 0) return;
+      const t = e.touches[0];
+      startX = t.clientX;
+      startY = t.clientY;
+      tracking = true;
+    }
+
+    function onTouchMove(e: TouchEvent) {
+      if (!tracking || !e.touches || e.touches.length === 0) return;
+      const t = e.touches[0];
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+
+      // If gesture is mostly horizontal and moving right, prevent default to avoid back navigation
+      if (Math.abs(dx) > Math.abs(dy) && dx > 20) {
+        try {
+          e.preventDefault();
+        } catch (err) {
+          // ignore
+        }
+      }
+    }
+
+    function onTouchEnd() {
+      tracking = false;
+    }
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove as EventListener, { passive: false });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart as EventListener);
+      el.removeEventListener("touchmove", onTouchMove as EventListener);
+      el.removeEventListener("touchend", onTouchEnd as EventListener);
+    };
+  }, []);
+
   return (
-    <main className="h-full w-full relative bg-neutral-100 touch-none">
+    <main
+      ref={mainRef}
+      className="h-full w-full relative bg-white dark:bg-neutral-900 touch-none overflow-hidden overscroll-none"
+      style={{ overscrollBehavior: "none" }}
+    >
+      {/* Dotted grid background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="dot-pattern-light" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+              <circle cx="1" cy="1" r="1" fill="#cbd5e1" />
+            </pattern>
+            <pattern id="dot-pattern-dark" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+              <circle cx="1" cy="1" r="1" fill="#404040" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#dot-pattern-light)" className="dark:hidden" />
+          <rect width="100%" height="100%" fill="url(#dot-pattern-dark)" className="hidden dark:block" />
+        </svg>
+      </div>
       <Info boardId={boardId} />
       <Participants />
       <Toolbar
@@ -946,6 +1096,61 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         <ShapesToolbar
           canvasState={canvasState}
           setCanvasState={setCanvasState}
+          onFileImport={async (file: File) => {
+            try {
+              // Upload to our Cloudinary route
+              const form = new FormData();
+              form.append('file', file);
+
+              const resp = await fetch('/api/uploads/cloudinary', {
+                method: 'POST',
+                body: form,
+              });
+
+              const json = await resp.json();
+              if (!resp.ok || !json?.url) {
+                console.error('Upload failed', json);
+                return;
+              }
+
+              const url: string = json.url;
+              const resourceType: string = json.resource_type || '';
+
+              const position = {
+                x: -camera.x + (typeof window !== 'undefined' ? window.innerWidth / 2 : 400),
+                y: -camera.y + (typeof window !== 'undefined' ? window.innerHeight / 2 : 300),
+              } as Point;
+
+              if (resourceType === 'image' || file.type.startsWith('image/')) {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => {
+                  const nw = img.naturalWidth;
+                  const nh = img.naturalHeight;
+                  const maxW = 1200;
+                  const maxH = 900;
+                  const scale = Math.min(1, maxW / nw, maxH / nh);
+                  const w = Math.round(nw * scale);
+                  const h = Math.round(nh * scale);
+                  insertImageLayer(position, w, h, { url, type: 'image', name: file.name });
+                };
+                img.onerror = () => {
+                  // Fallback to default size
+                  insertImageLayer(position, 480, 360, { url, type: 'image', name: file.name });
+                };
+                img.src = url;
+              } else if (resourceType === 'raw' || file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+                const w = 640;
+                const h = 820;
+                insertImageLayer(position, w, h, { url, type: 'pdf', name: file.name });
+              } else {
+                // generic file preview as image placeholder
+                insertImageLayer(position, 480, 360, { url, type: file.type || 'file', name: file.name });
+              }
+            } catch (err) {
+              console.error('Failed to import file:', err);
+            }
+          }}
         />
       )}
       
@@ -970,12 +1175,18 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       )}
 
       <svg
-        className={`h-[100vh] w-[100vw] ${
-          canvasState.mode === CanvasMode.Pencil
-            ? "cursor-crosshair"
+        className={`h-[100vh] w-[100vw] relative z-10 ${
+          isPanning
+            ? "cursor-hand-closed"
+            : isSpacePressed
+            ? "cursor-hand"
+            : canvasState.mode === CanvasMode.Pencil
+            ? "cursor-pencil"
             : canvasState.mode === CanvasMode.Eraser
             ? "cursor-none"
             : canvasState.mode === CanvasMode.ERDConnecting
+            ? "cursor-crosshair"
+            : canvasState.mode === CanvasMode.Inserting
             ? "cursor-crosshair"
             : ""
         }`}

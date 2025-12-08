@@ -48,9 +48,9 @@ export const AdvancedShape = ({
 
   const { x, y, width, height, fill, stroke, strokeWidth, type, value } = layer;
 
-  const fillColor = fill ? colorToCSS(fill) : "#000";
-  const strokeColor = selectionColor || (stroke ? colorToCSS(stroke) : "transparent");
-  const strokeW = selectionColor ? 2 : (strokeWidth || 1);
+  const fillColor = fill ? colorToCSS(fill) : "#CCC";
+  const strokeColor = selectionColor || (stroke ? colorToCSS(stroke) : "#666");
+  const strokeW = selectionColor ? 2 : (strokeWidth || 2);
 
   const renderShape = () => {
     switch (type) {
@@ -403,6 +403,61 @@ export const AdvancedShape = ({
         );
 
       case LayerType.WireImage:
+        // If the layer carries an image metadata, render it. The layer may be a LiveObject
+        // so we guard access with any cast.
+        const imageMeta: any = (layer as any).image;
+        if (imageMeta && imageMeta.url) {
+          if (imageMeta.type === 'image') {
+            return (
+              <g>
+                <image
+                  href={imageMeta.url}
+                  width={width}
+                  height={height}
+                  preserveAspectRatio="xMidYMid slice"
+                />
+                <rect
+                  x={0}
+                  y={0}
+                  width={width}
+                  height={height}
+                  fill="none"
+                  stroke={strokeColor}
+                  strokeWidth={strokeW}
+                />
+              </g>
+            );
+          }
+
+          if (imageMeta.type === 'pdf') {
+            // render PDF via iframe inside foreignObject
+            return (
+              <g>
+                <rect
+                  x={0}
+                  y={0}
+                  width={width}
+                  height={height}
+                  fill={fillColor}
+                  stroke={strokeColor}
+                  strokeWidth={strokeW}
+                />
+                <foreignObject x={0} y={0} width={width} height={height}>
+                  <div className="w-full h-full" xmlns="http://www.w3.org/1999/xhtml">
+                    <iframe
+                      src={imageMeta.url}
+                      title={imageMeta.name || 'pdf-preview'}
+                      className="w-full h-full"
+                      style={{ border: 'none', width: '100%', height: '100%' }}
+                    />
+                  </div>
+                </foreignObject>
+              </g>
+            );
+          }
+        }
+
+        // fallback wireframe if no image data is present
         return (
           <g style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}>
             <rect

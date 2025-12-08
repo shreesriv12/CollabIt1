@@ -27,9 +27,9 @@ export const Footer = ({
   };
 
   return (
-    <div className="relative bg-white p-3">
-      <p className="text-[13px] truncate max-w-[calc(100%-20px)]">{title}</p>
-      <p className="opacity-0 group-hover:opacity-100 transition-opacity text-[11px] text-muted-foreground truncate">
+    <div className="relative bg-white dark:bg-neutral-800 p-3 border-t border-gray-100 dark:border-neutral-700">
+      <p className="text-[13px] font-semibold truncate max-w-[calc(100%-20px)] text-gray-900 dark:text-white">{title}</p>
+      <p className="opacity-0 group-hover:opacity-100 transition-opacity text-[11px] text-gray-500 dark:text-gray-400 truncate">
         {authorLabel}, {createdAtLabel}
       </p>
       <button

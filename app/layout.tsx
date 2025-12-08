@@ -8,6 +8,7 @@ import { Toaster as UIToaster } from "@/components/ui/toaster";
 import { siteConfig } from "@/config";
 import { ConvexClientProvider } from "@/providers/convex-client-provider";
 import { ModalProvider } from "@/providers/modal-provider";
+import { ThemeProvider } from "@/providers/theme-provider";
 
 import "./globals.css";
 
@@ -25,15 +26,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <Suspense fallback={<Loading />}>
-          <ConvexClientProvider>
-            <Toaster theme="light" closeButton richColors />
-            <UIToaster />
-            <ModalProvider />
-            {children}
-          </ConvexClientProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <ConvexClientProvider>
+              <Toaster closeButton richColors />
+              <UIToaster />
+              <ModalProvider />
+              {children}
+            </ConvexClientProvider>
+          </ThemeProvider>
         </Suspense>
       </body>
     </html>

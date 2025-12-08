@@ -30,11 +30,13 @@ export const EmptyOrg = () => {
   };
 
   return (
-    <div className="h-full flex flex-col items-center justify-center">
-      <Image src="/elements.svg" alt="Empty" height={200} width={200} />
+    <div className="h-full flex flex-col items-center justify-center animate-in fade-in zoom-in duration-500">
+      <div className="animate-bounce">
+        <Image src="/elements.svg" alt="Empty" height={200} width={200} />
+      </div>
 
-      <h2 className="text-2xl font-semibold mt-6">Welcome to Miro</h2>
-      <p className="text-sm text-muted-foreground mt-2">
+      <h2 className="text-2xl font-bold mt-6 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">Welcome to CollabIt</h2>
+      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
         Create an organization to get started.
       </p>
 
