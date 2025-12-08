@@ -73,6 +73,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     mode: CanvasMode.None,
   });
   const [camera, setCamera] = useState<Camera>({ x: 0, y: 0 });
+  const [isHandPanning, setIsHandPanning] = useState(false);
   const [lastUsedColor, setLastUsedColor] = useState<Color>({
     r: 255,
     g: 255,
@@ -707,9 +708,33 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   );
 
   const onWheel = useCallback((e: React.WheelEvent) => {
+    // If Ctrl/Cmd is pressed, use wheel to zoom
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      const delta = -e.deltaY;
+      setCamera((prev) => {
+        const z = prev.zoom ?? 1;
+        const factor = delta > 0 ? 1.08 : 1 / 1.08;
+        const next = Math.max(0.25, Math.min(3, +(z * factor).toFixed(3)));
+        // zoom towards cursor position
+        const rect = (e.target as Element).getBoundingClientRect();
+        const cx = e.clientX - rect.left;
+        const cy = e.clientY - rect.top;
+        const worldX = (cx - prev.x) / z;
+        const worldY = (cy - prev.y) / z;
+        return {
+          x: Math.round(cx - worldX * next),
+          y: Math.round(cy - worldY * next),
+          zoom: next,
+        };
+      });
+      return;
+    }
+
     setCamera((camera) => ({
       x: camera.x - e.deltaX,
       y: camera.y - e.deltaY,
+      zoom: camera.zoom ?? 1,
     }));
   }, []);
 
@@ -783,7 +808,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       const point = pointerEventToCanvasPoint(e, camera);
 
       // Start panning with spacebar + left click or middle mouse button
-      if (isSpacePressed || e.button === 1) {
+      if (isSpacePressed || e.button === 1 || isHandPanning) {
         e.preventDefault();
         setIsPanning(true);
         setPanStart({ x: e.clientX, y: e.clientY });
@@ -1003,6 +1028,65 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     }
   }, [canvasState.mode]);
 
+  // Zoom handling
+  useEffect(() => {
+    // Ensure camera.zoom exists
+    setCamera((c) => ({ x: c.x, y: c.y, zoom: c.zoom ?? 1 }));
+  }, []);
+
+  const zoomTo = (newZoom: number) => {
+    setCamera((prev) => {
+      const oldZoom = prev.zoom ?? 1;
+      const centerX = typeof window !== 'undefined' ? window.innerWidth / 2 : 0;
+      const centerY = typeof window !== 'undefined' ? window.innerHeight / 2 : 0;
+      const worldX = (centerX - prev.x) / oldZoom;
+      const worldY = (centerY - prev.y) / oldZoom;
+      return {
+        x: Math.round(centerX - worldX * newZoom),
+        y: Math.round(centerY - worldY * newZoom),
+        zoom: newZoom,
+      };
+    });
+  };
+
+  const zoomIn = () => {
+    setCamera((prev) => {
+      const z = prev.zoom ?? 1;
+      const next = Math.min(3, +(z * 1.15).toFixed(3));
+      const centerX = typeof window !== 'undefined' ? window.innerWidth / 2 : 0;
+      const centerY = typeof window !== 'undefined' ? window.innerHeight / 2 : 0;
+      const worldX = (centerX - prev.x) / z;
+      const worldY = (centerY - prev.y) / z;
+      return { x: Math.round(centerX - worldX * next), y: Math.round(centerY - worldY * next), zoom: next };
+    });
+  };
+
+  const zoomOut = () => {
+    setCamera((prev) => {
+      const z = prev.zoom ?? 1;
+      const next = Math.max(0.25, +(z / 1.15).toFixed(3));
+      const centerX = typeof window !== 'undefined' ? window.innerWidth / 2 : 0;
+      const centerY = typeof window !== 'undefined' ? window.innerHeight / 2 : 0;
+      const worldX = (centerX - prev.x) / z;
+      const worldY = (centerY - prev.y) / z;
+      return { x: Math.round(centerX - worldX * next), y: Math.round(centerY - worldY * next), zoom: next };
+    });
+  };
+
+  const resetZoom = () => zoomTo(1);
+
+  const toggleHandPan = () => {
+    setIsHandPanning((v) => {
+      const next = !v;
+      if (!next) {
+        // turning off hand pan; also stop any active panning
+        setIsPanning(false);
+        setPanStart(null);
+      }
+      return next;
+    });
+  };
+
   // Prevent accidental browser back/forward navigation on horizontal swipes
   // by disabling overscroll and intercepting horizontal touch gestures.
   const mainRef = useRef<HTMLElement | null>(null);
@@ -1090,6 +1174,11 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         setShowFlowDiagram={setShowFlowDiagram}
         showERDDiagram={showERDDiagram}
         setShowERDDiagram={setShowERDDiagram}
+        zoomIn={zoomIn}
+        zoomOut={zoomOut}
+        resetZoom={resetZoom}
+        isHandPanning={isHandPanning}
+        toggleHandPan={toggleHandPan}
       />
       
       {showShapesToolbar && (
@@ -1116,9 +1205,12 @@ export const Canvas = ({ boardId }: CanvasProps) => {
               const url: string = json.url;
               const resourceType: string = json.resource_type || '';
 
+              const vw = typeof window !== 'undefined' ? window.innerWidth : 800;
+              const vh = typeof window !== 'undefined' ? window.innerHeight : 600;
+              const z = camera.zoom ?? 1;
               const position = {
-                x: -camera.x + (typeof window !== 'undefined' ? window.innerWidth / 2 : 400),
-                y: -camera.y + (typeof window !== 'undefined' ? window.innerHeight / 2 : 300),
+                x: Math.round((vw / 2 - camera.x) / z),
+                y: Math.round((vh / 2 - camera.y) / z),
               } as Point;
 
               if (resourceType === 'image' || file.type.startsWith('image/')) {
@@ -1178,6 +1270,8 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         className={`h-[100vh] w-[100vw] relative z-10 ${
           isPanning
             ? "cursor-hand-closed"
+            : isHandPanning
+            ? "cursor-hand"
             : isSpacePressed
             ? "cursor-hand"
             : canvasState.mode === CanvasMode.Pencil
@@ -1198,7 +1292,8 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       >
         <g
           style={{
-            transform: `translate(${camera.x}px, ${camera.y}px)`,
+            transform: `translate(${camera.x}px, ${camera.y}px) scale(${camera.zoom ?? 1})`,
+            transformOrigin: '0 0',
           }}
         >
           {layerIds.map((layerId) => (

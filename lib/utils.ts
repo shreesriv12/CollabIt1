@@ -27,9 +27,10 @@ export function pointerEventToCanvasPoint(
   e: React.PointerEvent,
   camera: Camera,
 ) {
+  const scale = (camera as any).zoom ?? 1;
   return {
-    x: Math.round(e.clientX) - camera.x,
-    y: Math.round(e.clientY) - camera.y,
+    x: Math.round((e.clientX - camera.x) / scale),
+    y: Math.round((e.clientY - camera.y) / scale),
   };
 }
 

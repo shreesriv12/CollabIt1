@@ -12,6 +12,9 @@ import {
   Undo2,
   Workflow,
   Sparkles,
+  ZoomIn,
+  ZoomOut,
+  RefreshCw,
 } from "lucide-react";
 
 import { CanvasMode, LayerType, type CanvasState } from "@/types/canvas";
@@ -33,6 +36,12 @@ type ToolbarProps = {
   setShowFlowDiagram: (show: boolean) => void;
   showERDDiagram: boolean;
   setShowERDDiagram: (show: boolean) => void;
+  // optional handlers for zoom and hand panning
+  zoomIn?: () => void;
+  zoomOut?: () => void;
+  resetZoom?: () => void;
+  isHandPanning?: boolean;
+  toggleHandPan?: () => void;
 };
 
 export const Toolbar = ({
@@ -48,12 +57,26 @@ export const Toolbar = ({
   setShowFlowDiagram,
   showERDDiagram,
   setShowERDDiagram,
+  zoomIn,
+  zoomOut,
+  resetZoom,
+  isHandPanning,
+  toggleHandPan,
 }: ToolbarProps) => {
   const { open: openAIMindmapModal } = useAIMindmapModal();
 
   return (
     <div className="absolute top-[50%] -translate-y-[50%] left-2 flex flex-col gap-y-4 z-20">
       <div className="bg-white dark:bg-neutral-800 rounded-lg p-2 flex gap-y-1.5 flex-col items-center shadow-lg border border-gray-200 dark:border-neutral-700">
+        {zoomIn && zoomOut && resetZoom && toggleHandPan && (
+          <>
+            <ToolButton label="Zoom In" icon={ZoomIn} onClick={zoomIn} />
+            <ToolButton label="Zoom Out" icon={ZoomOut} onClick={zoomOut} />
+            <ToolButton label="Reset Zoom" icon={RefreshCw} onClick={resetZoom} />
+            <ToolButton label="Hand" icon={MousePointer2} onClick={toggleHandPan} isActive={!!isHandPanning} />
+            <div className="mt-1" />
+          </>
+        )}
         <ToolButton
           label="Select"
           icon={MousePointer2}
