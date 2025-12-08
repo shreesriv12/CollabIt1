@@ -43,4 +43,17 @@ export default defineSchema({
     .index("by_list", ["listId"])
     .index("by_board", ["boardId"])
     .index("by_list_order", ["listId", "order"]),
+  cardActivities: defineTable({
+    cardId: v.id("cards"),
+    boardId: v.id("boards"),
+    listId: v.id("lists"),
+    action: v.string(), // "created", "moved", "updated", "deleted"
+    userId: v.optional(v.string()),
+    userName: v.optional(v.string()),
+    timestamp: v.number(),
+    metadata: v.optional(v.any()),
+  })
+    .index("by_card", ["cardId"])
+    .index("by_board", ["boardId"])
+    .index("by_board_timestamp", ["boardId", "timestamp"]),
 });

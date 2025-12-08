@@ -26,8 +26,8 @@ export const ERDToolbar = ({
   if (!isVisible) return null;
 
   return (
-    <div className="absolute top-2 left-[70px] bg-white rounded-md p-1.5 flex gap-x-1 items-center shadow-md">
-      <div className="flex items-center gap-x-1">
+    <div className="absolute top-20 left-[90px] bg-white dark:bg-neutral-800 rounded-lg p-2 flex gap-x-1 items-center shadow-lg border border-gray-200 dark:border-neutral-700 z-20">
+      <div className="flex items-center gap-x-1.5">
         <span className="text-xs font-medium text-gray-600 px-2">ERD Tools:</span>
         
         <ToolButton

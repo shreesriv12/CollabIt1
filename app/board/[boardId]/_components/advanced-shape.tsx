@@ -20,9 +20,9 @@ export const AdvancedShape = ({
 }: AdvancedShapeProps) => {
   const { x, y, width, height, fill, stroke, strokeWidth, type, value } = layer;
 
-  const fillColor = fill ? colorToCSS(fill) : "#000";
-  const strokeColor = selectionColor || (stroke ? colorToCSS(stroke) : "transparent");
-  const strokeW = selectionColor ? 2 : (strokeWidth || 1);
+  const fillColor = fill ? colorToCSS(fill) : "#CCC";
+  const strokeColor = selectionColor || (stroke ? colorToCSS(stroke) : "#666");
+  const strokeW = selectionColor ? 2 : (strokeWidth || 2);
 
   const renderShape = () => {
     switch (type) {

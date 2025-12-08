@@ -51,8 +51,8 @@ export const Toolbar = ({
   const { open: openAIMindmapModal } = useAIMindmapModal();
 
   return (
-    <div className="absolute top-[50%] -translate-y-[50%] left-2 flex flex-col gap-y-4">
-      <div className="bg-white rounded-md p-1.5 flex gap-y-1 flex-col items-center shadow-md">
+    <div className="absolute top-[50%] -translate-y-[50%] left-2 flex flex-col gap-y-4 z-20">
+      <div className="bg-white dark:bg-neutral-800 rounded-lg p-2 flex gap-y-1.5 flex-col items-center shadow-lg border border-gray-200 dark:border-neutral-700">
         <ToolButton
           label="Select"
           icon={MousePointer2}
@@ -177,7 +177,7 @@ export const Toolbar = ({
         />
       </div>
 
-      <div className="bg-white rounded-md p-1.5 flex flex-col items-center shadow-md">
+      <div className="bg-white dark:bg-neutral-800 rounded-lg p-2 flex flex-col gap-y-1.5 items-center shadow-lg border border-gray-200 dark:border-neutral-700">
         <ToolButton
           label="Undo"
           icon={Undo2}
@@ -198,7 +198,7 @@ export const Toolbar = ({
 export const ToolbarSkeleton = () => {
   return (
     <div
-      className="absolute top-[50%] -translate-y-[50%] left-2 flex flex-col gap-y-4 bg-white h-[360px] w-[52px] shadow-md rounded-md"
+      className="absolute top-[50%] -translate-y-[50%] left-2 flex flex-col gap-y-4 bg-white dark:bg-neutral-800 h-[360px] w-[52px] shadow-lg rounded-lg border border-gray-200 dark:border-neutral-700 z-20"
       aria-hidden
     />
   );

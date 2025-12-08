@@ -231,37 +231,37 @@ export const KanbanBoard = ({ boardId }: KanbanBoardProps) => {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className={`h-full w-full p-6 relative bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 ${
+      <div className={`h-full w-full p-6 relative bg-gray-50 dark:bg-neutral-900 ${
         layoutMode === "horizontal" ? "overflow-x-auto overflow-y-hidden scrollbar-hide-horizontal" : "overflow-auto scrollbar-thin"
       }`}>
         {/* Layout Toggle */}
         <div className="absolute top-6 left-6 z-10">
-          <div className="bg-white/90 backdrop-blur-sm rounded-full shadow-lg px-3 py-2 flex items-center gap-2 border border-gray-200/50">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg px-2 py-2 flex items-center gap-1 border border-gray-200 dark:border-neutral-700">
             <button
               onClick={() => setLayoutMode("horizontal")}
-              className={`p-2 rounded-lg transition-all duration-200 relative group ${
+              className={`p-2 rounded transition-all duration-200 relative group ${
                 layoutMode === "horizontal"
-                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-neutral-700"
               }`}
               title="Horizontal Scroll Layout"
             >
               <LayoutList className="h-4 w-4" />
-              <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+              <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                 Horizontal
               </span>
             </button>
             <button
               onClick={() => setLayoutMode("grid")}
-              className={`p-2 rounded-lg transition-all duration-200 relative group ${
+              className={`p-2 rounded transition-all duration-200 relative group ${
                 layoutMode === "grid"
-                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-neutral-700"
               }`}
               title="Flexible Grid Layout"
             >
               <LayoutGrid className="h-4 w-4" />
-              <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+              <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                 Grid
               </span>
             </button>
@@ -270,12 +270,12 @@ export const KanbanBoard = ({ boardId }: KanbanBoardProps) => {
 
         {/* Active Users Indicator */}
         {activeUsers > 1 && (
-          <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-sm rounded-full shadow-lg px-4 py-2 flex items-center gap-2 z-10 border border-blue-100 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="absolute top-6 right-6 bg-white dark:bg-neutral-800 rounded-lg shadow-lg px-4 py-2 flex items-center gap-2 z-10 border border-gray-200 dark:border-neutral-700 animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="relative">
               <Users className="h-4 w-4 text-blue-600" />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
             </div>
-            <span className="text-sm font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="text-sm font-semibold text-blue-600 dark:text-blue-500">
               {activeUsers} active
             </span>
           </div>
@@ -293,14 +293,14 @@ export const KanbanBoard = ({ boardId }: KanbanBoardProps) => {
 
           {/* Add List Button/Form */}
           {isAddingList ? (
-            <div className={`bg-white/80 backdrop-blur-sm rounded-xl p-4 border-2 border-dashed border-purple-300 shadow-lg animate-in fade-in zoom-in-95 duration-200 ${
+            <div className={`bg-white dark:bg-neutral-800 rounded-lg p-4 border-2 border-dashed border-gray-300 dark:border-neutral-600 shadow-lg animate-in fade-in zoom-in-95 duration-200 ${
               layoutMode === "horizontal" ? "w-80 flex-shrink-0" : "w-full"
             }`}>
               <Input
                 value={newListTitle}
                 onChange={(e) => setNewListTitle(e.target.value)}
                 placeholder="Enter list title..."
-                className="mb-3 border-purple-200 focus:border-purple-400 focus:ring-purple-400"
+                className="mb-3 border-gray-300 dark:border-neutral-600 focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-700 dark:text-white"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
@@ -313,7 +313,7 @@ export const KanbanBoard = ({ boardId }: KanbanBoardProps) => {
                 }}
               />
               <div className="flex gap-2">
-                <Button size="sm" onClick={handleAddList} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                <Button size="sm" onClick={handleAddList} className="bg-blue-600 hover:bg-blue-700 text-white">
                   Add List
                 </Button>
                 <Button
@@ -323,7 +323,7 @@ export const KanbanBoard = ({ boardId }: KanbanBoardProps) => {
                     setIsAddingList(false);
                     setNewListTitle("");
                   }}
-                  className="hover:bg-gray-100"
+                  className="hover:bg-gray-100 dark:hover:bg-neutral-700"
                 >
                   Cancel
                 </Button>
@@ -332,13 +332,13 @@ export const KanbanBoard = ({ boardId }: KanbanBoardProps) => {
           ) : (
             <Button
               variant="ghost"
-              className={`h-fit justify-start bg-white/60 backdrop-blur-sm hover:bg-white/90 border-2 border-dashed border-gray-300 hover:border-purple-400 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 group ${
+              className={`h-fit justify-start bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-750 border-2 border-dashed border-gray-300 dark:border-neutral-600 hover:border-blue-400 dark:hover:border-blue-500 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 group ${
                 layoutMode === "horizontal" ? "w-80 flex-shrink-0" : "w-full"
               }`}
               onClick={() => setIsAddingList(true)}
             >
-              <Plus className="h-5 w-5 mr-2 text-gray-400 group-hover:text-purple-600 transition-colors" />
-              <span className="text-gray-600 group-hover:text-purple-600 font-medium">Add a list</span>
+              <Plus className="h-5 w-5 mr-2 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-500 transition-colors" />
+              <span className="text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-500 font-medium">Add a list</span>
             </Button>
           )}
         </div>

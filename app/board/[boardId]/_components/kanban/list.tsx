@@ -92,13 +92,13 @@ export const List = ({ list, layoutMode = "horizontal" }: ListProps) => {
   };
 
   return (
-    <div className={`bg-gradient-to-br from-white to-gray-50 rounded-xl p-4 flex flex-col shadow-lg border-2 hover:shadow-xl transition-all duration-200 backdrop-blur-sm ${
+    <div className={`bg-white dark:bg-neutral-800 rounded-xl p-4 flex flex-col shadow-lg border hover:shadow-xl transition-all duration-200 ${
       layoutMode === "horizontal" ? "w-80 flex-shrink-0 max-h-full" : "w-full h-fit"
     } ${
-      isOver ? "border-blue-500 bg-blue-50/50 shadow-2xl scale-[1.02]" : "border-gray-200/50"
+      isOver ? "border-blue-500 dark:border-blue-600 bg-blue-50/50 dark:bg-blue-950/30 shadow-2xl scale-[1.02]" : "border-gray-200 dark:border-neutral-700"
     }`}>
       {/* List Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200 dark:border-neutral-700">
         {isEditingTitle ? (
           <Input
             value={title}
@@ -113,12 +113,12 @@ export const List = ({ list, layoutMode = "horizontal" }: ListProps) => {
                 setIsEditingTitle(false);
               }
             }}
-            className="h-9 font-bold text-base border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+            className="h-9 font-bold text-base border-gray-300 dark:border-neutral-600 focus:border-blue-500 focus:ring-blue-500 bg-white dark:bg-neutral-700 text-gray-900 dark:text-white"
             autoFocus
           />
         ) : (
           <h3
-            className="font-bold text-base bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent flex-1 cursor-pointer px-3 py-2 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200"
+            className="font-bold text-base text-gray-900 dark:text-white flex-1 cursor-pointer px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700 transition-all duration-200"
             onClick={() => setIsEditingTitle(true)}
           >
             {list.title}
@@ -127,7 +127,7 @@ export const List = ({ list, layoutMode = "horizontal" }: ListProps) => {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-100 dark:hover:bg-neutral-700">
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -150,10 +150,10 @@ export const List = ({ list, layoutMode = "horizontal" }: ListProps) => {
       {/* Cards Container */}
       <div 
         ref={setNodeRef} 
-        className={`flex-1 overflow-y-auto mb-3 space-y-0 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 pr-1 rounded-lg transition-all duration-200 ${
+        className={`flex-1 overflow-y-auto mb-3 space-y-0 scrollbar-thin pr-1 rounded-lg transition-all duration-200 ${
           layoutMode === "horizontal" ? "min-h-[120px] max-h-[calc(100vh-300px)]" : "min-h-[120px] max-h-[600px]"
         } ${
-          isOver ? "bg-blue-100/30 ring-2 ring-blue-400 ring-inset" : ""
+          isOver ? "bg-blue-100/30 dark:bg-blue-950/30 ring-2 ring-blue-400 dark:ring-blue-600 ring-inset" : ""
         }`}
       >
         <SortableContext items={cardIds} strategy={verticalListSortingStrategy}>
@@ -163,7 +163,7 @@ export const List = ({ list, layoutMode = "horizontal" }: ListProps) => {
         </SortableContext>
         {/* Empty state indicator when hovering over empty list */}
         {isOver && cards?.length === 0 && (
-          <div className="flex items-center justify-center h-full text-blue-600 font-medium text-sm animate-pulse">
+          <div className="flex items-center justify-center h-full text-blue-600 dark:text-blue-400 font-medium text-sm animate-pulse">
             Drop card here
           </div>
         )}
@@ -171,12 +171,12 @@ export const List = ({ list, layoutMode = "horizontal" }: ListProps) => {
 
       {/* Add Card Section */}
       {isAddingCard ? (
-        <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200 animate-in fade-in slide-in-from-bottom-2 duration-200">
+        <div className="mt-2 p-3 bg-white dark:bg-neutral-700 rounded-lg border border-gray-300 dark:border-neutral-600 animate-in fade-in slide-in-from-bottom-2 duration-200">
           <Input
             value={newCardTitle}
             onChange={(e) => setNewCardTitle(e.target.value)}
             placeholder="Enter card title..."
-            className="mb-2 bg-white border-blue-200 focus:border-blue-400"
+            className="mb-2 bg-white dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 focus:border-blue-500 text-gray-900 dark:text-white"
             autoFocus
             onKeyDown={(e) => {
               if (e.key === "Enter") {

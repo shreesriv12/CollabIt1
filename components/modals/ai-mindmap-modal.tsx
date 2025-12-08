@@ -126,7 +126,7 @@ export function AIMindmapModal({
                   <button
                     key={example}
                     onClick={() => setTopic(example)}
-                    className="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded transition-colors"
+                    className="text-xs bg-gray-100 dark:bg-neutral-700 hover:bg-gray-200 dark:hover:bg-neutral-600 px-2 py-1 rounded transition-colors text-gray-700 dark:text-gray-300"
                     disabled={isLoading}
                   >
                     {example}
@@ -152,7 +152,7 @@ export function AIMindmapModal({
             <Button 
               onClick={handleGenerateFromTopic} 
               disabled={isLoading || !topic.trim()}
-              className="w-full"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
             >
               {isLoading ? (
                 <>
@@ -187,7 +187,7 @@ export function AIMindmapModal({
             <Button 
               onClick={handleGenerateFromText} 
               disabled={isLoading || !text.trim()}
-              className="w-full"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
             >
               {isLoading ? (
                 <>
@@ -205,14 +205,14 @@ export function AIMindmapModal({
         </Tabs>
 
         {error && (
-          <div className="p-3 text-sm bg-red-50 border border-red-200 rounded-md text-red-600">
+          <div className="p-3 text-sm bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-md text-red-600 dark:text-red-400">
             {error}
           </div>
         )}
 
-        <div className="text-xs text-muted-foreground bg-blue-50 p-3 rounded-md">
-          <div className="font-medium mb-1">Powered by Google Gemini Flash 2.5</div>
-          <div>AI-generated mind maps help visualize complex topics and relationships between concepts.</div>
+        <div className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-950/30 p-3 rounded-md border border-blue-100 dark:border-blue-900">
+          <div className="font-medium mb-1 text-blue-900 dark:text-blue-300">Powered by Google Gemini Flash 2.5</div>
+          <div className="text-gray-600 dark:text-gray-400">AI-generated mind maps help visualize complex topics and relationships between concepts.</div>
         </div>
       </DialogContent>
     </Dialog>

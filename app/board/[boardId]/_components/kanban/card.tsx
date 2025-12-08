@@ -72,11 +72,11 @@ export const Card = ({ card }: CardProps) => {
 
   if (isEditing) {
     return (
-      <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl shadow-lg border-2 border-blue-300 p-4 mb-3 animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-white dark:bg-neutral-700 rounded-lg shadow-lg border-2 border-blue-500 dark:border-blue-600 p-4 mb-3 animate-in fade-in zoom-in-95 duration-200">
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="mb-3 font-semibold border-blue-300 focus:border-blue-500 bg-white"
+          className="mb-3 font-semibold border-gray-300 dark:border-neutral-600 focus:border-blue-500 dark:focus:border-blue-600 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white"
           placeholder="Card title"
           autoFocus
           onKeyDown={(e) => {
@@ -94,22 +94,22 @@ export const Card = ({ card }: CardProps) => {
         <Textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="mb-3 min-h-[80px] border-blue-300 focus:border-blue-500 bg-white resize-none"
+          className="mb-3 min-h-[80px] border-gray-300 dark:border-neutral-600 focus:border-blue-500 dark:focus:border-blue-600 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white resize-none"
           placeholder="Add description..."
         />
         <div className="flex gap-2">
-          <Button size="sm" onClick={handleUpdate} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+          <Button size="sm" onClick={handleUpdate} className="bg-blue-600 hover:bg-blue-700 text-white">
             Save
           </Button>
           <Button
             size="sm"
-            variant="outline"
+            variant="ghost"
             onClick={() => {
               setIsEditing(false);
               setTitle(card.title);
               setDescription(card.description || "");
             }}
-            className="hover:bg-white"
+            className="hover:bg-gray-100 dark:hover:bg-neutral-600 text-gray-700 dark:text-gray-300"
           >
             Cancel
           </Button>
@@ -130,8 +130,8 @@ export const Card = ({ card }: CardProps) => {
       {...attributes}
       {...listeners}
       className={`
-        bg-white rounded-xl shadow-md border-2 border-gray-200 p-4 mb-3
-        hover:shadow-lg hover:border-blue-400 cursor-grab active:cursor-grabbing 
+        bg-white dark:bg-neutral-700 rounded-lg shadow-md border border-gray-200 dark:border-neutral-600 p-4 mb-3
+        hover:shadow-lg hover:border-blue-500 dark:hover:border-blue-600 cursor-grab active:cursor-grabbing 
         transition-all duration-200 group hover:scale-[1.02] hover:-translate-y-1
         ${isDragging ? "opacity-30 z-50 scale-105" : ""}
       `}
@@ -139,11 +139,11 @@ export const Card = ({ card }: CardProps) => {
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <h4 className="font-semibold text-sm text-gray-900 break-words mb-1">
+          <h4 className="font-semibold text-sm text-gray-900 dark:text-white break-words mb-1">
             {card.title}
           </h4>
           {card.description && (
-            <p className="text-xs text-gray-600 mt-2 line-clamp-3 leading-relaxed bg-gray-50 p-2 rounded-md">
+            <p className="text-xs text-gray-600 dark:text-gray-300 mt-2 line-clamp-3 leading-relaxed bg-gray-50 dark:bg-neutral-800 p-2 rounded-md">
               {card.description}
             </p>
           )}

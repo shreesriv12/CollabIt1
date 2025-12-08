@@ -74,9 +74,9 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   });
   const [camera, setCamera] = useState<Camera>({ x: 0, y: 0 });
   const [lastUsedColor, setLastUsedColor] = useState<Color>({
-    r: 0,
-    g: 0,
-    b: 0,
+    r: 255,
+    g: 255,
+    b: 255,
   });
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState<Point | null>(null);
@@ -84,9 +84,9 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   const [cursorPosition, setCursorPosition] = useState<Point | null>(null);
   const [strokeWidth, setStrokeWidth] = useState<number>(2);
   const [strokeColor, setStrokeColor] = useState<Color>({
-    r: 0,
-    g: 0,
-    b: 0,
+    r: 255,
+    g: 255,
+    b: 255,
   });
   const [showShapesToolbar, setShowShapesToolbar] = useState<boolean>(false);
   const [showFlowDiagram, setShowFlowDiagram] = useState<boolean>(false);
@@ -975,7 +975,22 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   }, [canvasState.mode]);
 
   return (
-    <main className="h-full w-full relative bg-neutral-100 touch-none">
+    <main className="h-full w-full relative bg-white dark:bg-neutral-900 touch-none overflow-hidden">
+      {/* Dotted grid background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="dot-pattern-light" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+              <circle cx="1" cy="1" r="1" fill="#cbd5e1" />
+            </pattern>
+            <pattern id="dot-pattern-dark" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+              <circle cx="1" cy="1" r="1" fill="#404040" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#dot-pattern-light)" className="dark:hidden" />
+          <rect width="100%" height="100%" fill="url(#dot-pattern-dark)" className="hidden dark:block" />
+        </svg>
+      </div>
       <Info boardId={boardId} />
       <Participants />
       <Toolbar
@@ -1021,16 +1036,18 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       )}
 
       <svg
-        className={`h-[100vh] w-[100vw] ${
+        className={`h-[100vh] w-[100vw] relative z-10 ${
           isPanning
-            ? "cursor-grabbing"
+            ? "cursor-hand-closed"
             : isSpacePressed
-            ? "cursor-grab"
+            ? "cursor-hand"
             : canvasState.mode === CanvasMode.Pencil
-            ? "cursor-crosshair"
+            ? "cursor-pencil"
             : canvasState.mode === CanvasMode.Eraser
             ? "cursor-none"
             : canvasState.mode === CanvasMode.ERDConnecting
+            ? "cursor-crosshair"
+            : canvasState.mode === CanvasMode.Inserting
             ? "cursor-crosshair"
             : ""
         }`}

@@ -64,8 +64,8 @@ export const ShapesToolbar = memo(
     );
 
     return (
-      <div className="absolute top-2 right-2 bg-white rounded-md p-2 shadow-md border">
-        <div className="grid grid-cols-4 gap-1">
+      <div className="absolute top-2 right-2 bg-white dark:bg-neutral-800 rounded-lg p-3 shadow-lg border border-gray-200 dark:border-neutral-700 z-20">
+        <div className="grid grid-cols-4 gap-1.5">
           {/* Basic Shapes */}
           <div className="col-span-4 text-xs text-gray-600 mb-1 text-center">Basic</div>
           <ShapeButton icon={Diamond} label="Diamond" layerType={LayerType.Diamond} />

@@ -28,11 +28,13 @@ export const EmptyBoards = () => {
       .catch(() => toast.error("Failed to create board."));
   };
   return (
-    <div className="h-full flex flex-col items-center justify-center">
-      <Image src="/empty-boards.svg" alt="Empty" height={110} width={110} />
-      <h2 className="text-2xl font-semibold mt-6">Create your first board.</h2>
+    <div className="h-full flex flex-col items-center justify-center animate-in fade-in zoom-in duration-500">
+      <div className="animate-pulse">
+        <Image src="/empty-boards.svg" alt="Empty" height={110} width={110} />
+      </div>
+      <h2 className="text-2xl font-bold mt-6 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">Create your first board.</h2>
 
-      <p className="text-muted-foreground text-sm mt-2">
+      <p className="text-gray-600 dark:text-gray-400 text-sm mt-2">
         Start by creating a board for your organization.
       </p>
 

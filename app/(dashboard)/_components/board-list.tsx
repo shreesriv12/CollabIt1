@@ -23,8 +23,8 @@ export const BoardList = ({ orgId, query }: BoardListProps) => {
 
   if (data === undefined)
     return (
-      <div>
-        <h2 className="text-3xl">
+      <div className="animate-in fade-in duration-300">
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
           {query.favourites ? "Favourite boards" : "Team boards"}
         </h2>
 
@@ -51,8 +51,8 @@ export const BoardList = ({ orgId, query }: BoardListProps) => {
   }
 
   return (
-    <div>
-      <h2 className="text-3xl">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
         {query.favourites ? "Favourite boards" : "Team boards"}
       </h2>
 

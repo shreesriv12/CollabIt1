@@ -38,7 +38,7 @@ export const DrawingTools = memo(
     };
 
     return (
-      <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-white rounded-md p-3 shadow-md border flex items-center gap-4">
+      <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-white dark:bg-neutral-800 rounded-lg p-3 shadow-lg border border-gray-200 dark:border-neutral-700 flex items-center gap-4 z-30">
         {/* Stroke Color Section */}
         <div className="flex flex-col items-center gap-2">
           <span className="text-xs font-medium text-neutral-600">Stroke</span>

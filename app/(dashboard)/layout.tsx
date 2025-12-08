@@ -6,7 +6,7 @@ import { Sidebar } from "./_components/sidebar";
 
 const DashboardLayout = ({ children }: PropsWithChildren) => {
   return (
-    <main className="h-full">
+    <main className="h-full bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-neutral-950 dark:via-blue-950/20 dark:to-purple-950/20">
       <Sidebar />
 
       <div className="pl-[60px] h-full">

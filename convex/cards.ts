@@ -67,6 +67,15 @@ export const create = mutation({
       updatedAt: now,
     });
 
+    // Track activity
+    await ctx.db.insert("cardActivities", {
+      cardId,
+      boardId: args.boardId,
+      listId: args.listId,
+      action: "created",
+      timestamp: now,
+    });
+
     return cardId;
   },
 });
@@ -81,8 +90,12 @@ export const update = mutation({
   handler: async (ctx, args) => {
     const { id, title, description } = args;
     
+    const card = await ctx.db.get(id);
+    if (!card) return id;
+
+    const now = Date.now();
     const updates: any = {
-      updatedAt: Date.now(),
+      updatedAt: now,
     };
 
     if (title !== undefined) {
@@ -95,6 +108,15 @@ export const update = mutation({
 
     await ctx.db.patch(id, updates);
 
+    // Track activity
+    await ctx.db.insert("cardActivities", {
+      cardId: id,
+      boardId: card.boardId,
+      listId: card.listId,
+      action: "updated",
+      timestamp: now,
+    });
+
     return id;
   },
 });
@@ -103,6 +125,20 @@ export const update = mutation({
 export const remove = mutation({
   args: { id: v.id("cards") },
   handler: async (ctx, args) => {
+    const card = await ctx.db.get(args.id);
+    if (!card) return args.id;
+
+    const now = Date.now();
+
+    // Track activity before deletion
+    await ctx.db.insert("cardActivities", {
+      cardId: args.id,
+      boardId: card.boardId,
+      listId: card.listId,
+      action: "deleted",
+      timestamp: now,
+    });
+
     await ctx.db.delete(args.id);
     return args.id;
   },
@@ -116,11 +152,29 @@ export const move = mutation({
     newOrder: v.number(),
   },
   handler: async (ctx, args) => {
+    const card = await ctx.db.get(args.cardId);
+    if (!card) return args.cardId;
+
+    const now = Date.now();
+    const oldListId = card.listId;
+
     await ctx.db.patch(args.cardId, {
       listId: args.newListId,
       order: args.newOrder,
-      updatedAt: Date.now(),
+      updatedAt: now,
     });
+
+    // Track activity if moved to a different list
+    if (oldListId !== args.newListId) {
+      await ctx.db.insert("cardActivities", {
+        cardId: args.cardId,
+        boardId: card.boardId,
+        listId: args.newListId,
+        action: "moved",
+        timestamp: now,
+        metadata: { fromListId: oldListId },
+      });
+    }
 
     return args.cardId;
   },
