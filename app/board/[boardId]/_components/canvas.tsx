@@ -405,6 +405,35 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     []
   );
 
+  const insertImageLayer = useMutation(
+    ({ storage, setMyPresence }, position: Point, width: number, height: number, image: { url: string; type: string; name?: string }) => {
+      const liveLayers = storage.get("layers");
+      if (liveLayers.size >= MAX_LAYERS) return;
+
+      const liveLayerIds = storage.get("layerIds");
+      const layerId = nanoid();
+
+      const layer = new LiveObject({
+        type: LayerType.WireImage,
+        x: position.x,
+        y: position.y,
+        width,
+        height,
+        fill: { r: 255, g: 255, b: 255, a: 0.1 },
+        stroke: strokeColor,
+        strokeWidth: strokeWidth,
+        image, // store image metadata (url, type, name)
+      });
+
+      liveLayerIds.push(layerId);
+      liveLayers.set(layerId, layer);
+
+      setMyPresence({ selection: [layerId] }, { addToHistory: true });
+      setCanvasState({ mode: CanvasMode.None });
+    },
+    [strokeColor, strokeWidth],
+  );
+
   const insertMindMapLayers = useMutation(
     ({ storage, setMyPresence }, mindMapData: MindMapData) => {
       const liveLayers = storage.get("layers");
@@ -1067,6 +1096,61 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         <ShapesToolbar
           canvasState={canvasState}
           setCanvasState={setCanvasState}
+          onFileImport={async (file: File) => {
+            try {
+              // Upload to our Cloudinary route
+              const form = new FormData();
+              form.append('file', file);
+
+              const resp = await fetch('/api/uploads/cloudinary', {
+                method: 'POST',
+                body: form,
+              });
+
+              const json = await resp.json();
+              if (!resp.ok || !json?.url) {
+                console.error('Upload failed', json);
+                return;
+              }
+
+              const url: string = json.url;
+              const resourceType: string = json.resource_type || '';
+
+              const position = {
+                x: -camera.x + (typeof window !== 'undefined' ? window.innerWidth / 2 : 400),
+                y: -camera.y + (typeof window !== 'undefined' ? window.innerHeight / 2 : 300),
+              } as Point;
+
+              if (resourceType === 'image' || file.type.startsWith('image/')) {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => {
+                  const nw = img.naturalWidth;
+                  const nh = img.naturalHeight;
+                  const maxW = 1200;
+                  const maxH = 900;
+                  const scale = Math.min(1, maxW / nw, maxH / nh);
+                  const w = Math.round(nw * scale);
+                  const h = Math.round(nh * scale);
+                  insertImageLayer(position, w, h, { url, type: 'image', name: file.name });
+                };
+                img.onerror = () => {
+                  // Fallback to default size
+                  insertImageLayer(position, 480, 360, { url, type: 'image', name: file.name });
+                };
+                img.src = url;
+              } else if (resourceType === 'raw' || file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+                const w = 640;
+                const h = 820;
+                insertImageLayer(position, w, h, { url, type: 'pdf', name: file.name });
+              } else {
+                // generic file preview as image placeholder
+                insertImageLayer(position, 480, 360, { url, type: file.type || 'file', name: file.name });
+              }
+            } catch (err) {
+              console.error('Failed to import file:', err);
+            }
+          }}
         />
       )}
       

@@ -362,6 +362,61 @@ export const AdvancedShape = ({
         );
 
       case LayerType.WireImage:
+        // If the layer carries an image metadata, render it. The layer may be a LiveObject
+        // so we guard access with any cast.
+        const imageMeta: any = (layer as any).image;
+        if (imageMeta && imageMeta.url) {
+          if (imageMeta.type === 'image') {
+            return (
+              <g>
+                <image
+                  href={imageMeta.url}
+                  width={width}
+                  height={height}
+                  preserveAspectRatio="xMidYMid slice"
+                />
+                <rect
+                  x={0}
+                  y={0}
+                  width={width}
+                  height={height}
+                  fill="none"
+                  stroke={strokeColor}
+                  strokeWidth={strokeW}
+                />
+              </g>
+            );
+          }
+
+          if (imageMeta.type === 'pdf') {
+            // render PDF via iframe inside foreignObject
+            return (
+              <g>
+                <rect
+                  x={0}
+                  y={0}
+                  width={width}
+                  height={height}
+                  fill={fillColor}
+                  stroke={strokeColor}
+                  strokeWidth={strokeW}
+                />
+                <foreignObject x={0} y={0} width={width} height={height}>
+                  <div className="w-full h-full" xmlns="http://www.w3.org/1999/xhtml">
+                    <iframe
+                      src={imageMeta.url}
+                      title={imageMeta.name || 'pdf-preview'}
+                      className="w-full h-full"
+                      style={{ border: 'none', width: '100%', height: '100%' }}
+                    />
+                  </div>
+                </foreignObject>
+              </g>
+            );
+          }
+        }
+
+        // fallback wireframe if no image data is present
         return (
           <g>
             <rect

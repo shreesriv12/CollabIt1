@@ -27,10 +27,11 @@ import { CanvasMode, LayerType, type CanvasState } from "@/types/canvas";
 type ShapesToolbarProps = {
   canvasState: CanvasState;
   setCanvasState: (newState: CanvasState) => void;
+  onFileImport?: (file: File) => void;
 };
 
 export const ShapesToolbar = memo(
-  ({ canvasState, setCanvasState }: ShapesToolbarProps) => {
+  ({ canvasState, setCanvasState, onFileImport }: ShapesToolbarProps & { onFileImport?: (file: File) => void }) => {
     const ShapeButton = ({ 
       icon: Icon, 
       label, 
@@ -101,7 +102,25 @@ export const ShapesToolbar = memo(
           <div className="col-span-4 text-xs text-gray-600 mb-1 mt-2 text-center border-t pt-2">Wireframe</div>
           <ShapeButton icon={Square} label="Button" layerType={LayerType.WireButton} />
           <ShapeButton icon={Square} label="Input" layerType={LayerType.WireInput} />
-          <ShapeButton icon={Image} label="Image" layerType={LayerType.WireImage} />
+          <ShapeButton
+            icon={Image}
+            label="Image"
+            layerType={LayerType.WireImage}
+            onClick={() => {
+              if (onFileImport) {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = "image/*,application/pdf";
+                input.onchange = (e) => {
+                  const f = (e.target as HTMLInputElement).files?.[0];
+                  if (f) onFileImport(f);
+                };
+                input.click();
+              } else {
+                setCanvasState({ mode: CanvasMode.Inserting, layerType: LayerType.WireImage });
+              }
+            }}
+          />
           <ShapeButton icon={Type} label="Text Block" layerType={LayerType.WireText} />
           
           <ShapeButton icon={CheckSquare} label="Checkbox" layerType={LayerType.WireCheckbox} />

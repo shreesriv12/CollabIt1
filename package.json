@@ -33,6 +33,7 @@
     "@reactflow/core": "^11.11.4",
     "@reactflow/minimap": "^11.7.14",
     "class-variance-authority": "^0.7.1",
+    "cloudinary": "^2.8.0",
     "clsx": "^2.1.0",
     "convex": "^1.29.3",
     "convex-helpers": "^0.1.23",
