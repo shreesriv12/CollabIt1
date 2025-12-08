@@ -18,6 +18,7 @@ import { CanvasMode, LayerType, type CanvasState } from "@/types/canvas";
 import { useAIMindmapModal } from "@/store/use-ai-mindmap-modal";
 
 import { ToolButton } from "./tool-button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type ToolbarProps = {
   canvasState: CanvasState;
@@ -198,8 +199,17 @@ export const Toolbar = ({
 export const ToolbarSkeleton = () => {
   return (
     <div
-      className="absolute top-[50%] -translate-y-[50%] left-2 flex flex-col gap-y-4 bg-white dark:bg-neutral-800 h-[360px] w-[52px] shadow-lg rounded-lg border border-gray-200 dark:border-neutral-700 z-20"
+      className="absolute top-[50%] -translate-y-[50%] left-2 flex flex-col gap-y-4 bg-white dark:bg-neutral-800 h-[360px] w-[52px] shadow-lg rounded-lg border border-gray-200 dark:border-neutral-700 z-20 p-3"
       aria-hidden
-    />
+    >
+      <div className="flex flex-col gap-3 items-center">
+        <Skeleton className="h-8 w-8 rounded-md" />
+        <Skeleton className="h-8 w-8 rounded-md" />
+        <Skeleton className="h-8 w-8 rounded-md" />
+        <div className="mt-2" />
+        <Skeleton className="h-8 w-8 rounded-md" />
+        <Skeleton className="h-8 w-8 rounded-md" />
+      </div>
+    </div>
   );
 };

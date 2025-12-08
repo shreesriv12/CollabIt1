@@ -2,7 +2,7 @@
 
 import { LiveObject } from "@liveblocks/client";
 import { nanoid } from "nanoid";
-import React, { useCallback, useMemo, useState, useEffect } from "react";
+import React, { useCallback, useMemo, useState, useEffect, useRef } from "react";
 
 import { useDisableScrollBounce } from "@/hooks/use-disable-scroll-bounce";
 import { useDeleteLayers } from "@/hooks/use-delete-layers";
@@ -974,8 +974,63 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     }
   }, [canvasState.mode]);
 
+  // Prevent accidental browser back/forward navigation on horizontal swipes
+  // by disabling overscroll and intercepting horizontal touch gestures.
+  const mainRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const el = mainRef.current;
+    if (!el || typeof window === "undefined") return;
+
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+
+    function onTouchStart(e: TouchEvent) {
+      if (!e.touches || e.touches.length === 0) return;
+      const t = e.touches[0];
+      startX = t.clientX;
+      startY = t.clientY;
+      tracking = true;
+    }
+
+    function onTouchMove(e: TouchEvent) {
+      if (!tracking || !e.touches || e.touches.length === 0) return;
+      const t = e.touches[0];
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+
+      // If gesture is mostly horizontal and moving right, prevent default to avoid back navigation
+      if (Math.abs(dx) > Math.abs(dy) && dx > 20) {
+        try {
+          e.preventDefault();
+        } catch (err) {
+          // ignore
+        }
+      }
+    }
+
+    function onTouchEnd() {
+      tracking = false;
+    }
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove as EventListener, { passive: false });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart as EventListener);
+      el.removeEventListener("touchmove", onTouchMove as EventListener);
+      el.removeEventListener("touchend", onTouchEnd as EventListener);
+    };
+  }, []);
+
   return (
-    <main className="h-full w-full relative bg-white dark:bg-neutral-900 touch-none overflow-hidden">
+    <main
+      ref={mainRef}
+      className="h-full w-full relative bg-white dark:bg-neutral-900 touch-none overflow-hidden overscroll-none"
+      style={{ overscrollBehavior: "none" }}
+    >
       {/* Dotted grid background */}
       <div className="absolute inset-0 pointer-events-none">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">

@@ -10,6 +10,7 @@ import { Actions } from "@/components/actions";
 import { Hint } from "@/components/hint";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
@@ -91,8 +92,18 @@ export const Info = ({ boardId }: InfoProps) => {
 export const InfoSkeleton = () => {
   return (
     <div
-      className="w-[300px] absolute top-2 left-2 bg-white dark:bg-neutral-800 rounded-lg px-2 h-12 flex items-center shadow-lg border border-gray-200 dark:border-neutral-700 z-30"
+      className="w-[300px] absolute top-2 left-2 bg-white dark:bg-neutral-800 rounded-lg px-3 h-12 flex items-center shadow-lg border border-gray-200 dark:border-neutral-700 z-30"
       aria-hidden
-    />
+    >
+      <div className="flex items-center gap-3 w-full">
+        <Skeleton className="h-8 w-8 rounded-full" />
+        <div className="flex-1">
+          <Skeleton className="h-4 w-40 rounded-md" />
+        </div>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-8 w-8 rounded-md" />
+        </div>
+      </div>
+    </div>
   );
 };
