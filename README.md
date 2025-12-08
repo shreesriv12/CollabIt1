@@ -2,270 +2,333 @@
 
 
 <!-- Table of Contents -->
-<details>
+<!--
+  CollabIt - Collaborative Whiteboard & Kanban
+  ===========================================
 
-<summary>
+  This README is intentionally detailed: it explains the project, features,
+  architecture, developer setup, deployment options (Render, Vercel),
+  environment variables, and troubleshooting tips useful for contributors
+  and operators.
 
-# :notebook_with_decorative_cover: Table of Contents
+  NOTE: Do not commit secrets. Keep `.env.local` local and use platform
+  environment variables for deployment.
+-->
 
-</summary>
+<a name="readme-top"></a>
 
-- [Folder Structure](#bangbang-folder-structure)
-- [Getting Started](#toolbox-getting-started)
-- [Screenshots](#camera-screenshots)
-- [Tech Stack](#gear-tech-stack)
-- [Stats](#wrench-stats)
-- [Contribute](#raised_hands-contribute)
-- [Acknowledgements](#gem-acknowledgements)
-- [Buy Me a Coffee](#coffee-buy-me-a-coffee)
-- [Follow Me](#rocket-follow-me)
-- [Learn More](#books-learn-more)
-- [Deploy on Vercel](#page_with_curl-deploy-on-vercel)
-- [Give A Star](#star-give-a-star)
-- [Star History](#star2-star-history)
-- [Give A Star](#star-give-a-star)
+# CollabIt
 
-</details>
+> CollabIt is a collaborative, real-time whiteboard and Kanban app built with
+> Next.js that combines a React Flow-based diagram editor with a Kanban
+> board, live presence and storage (Liveblocks), and backend logic (Convex).
 
-## :bangbang: Folder Structure
+Table of contents
+  - [Overview](#overview)
+  - [Key Features](#key-features)
+  - [Architecture & Tech Stack](#architecture--tech-stack)
+  - [Folder Map (short)](#folder-map-short)
+  - [Local Development](#local-development)
+  - [Environment Variables](#environment-variables)
+  - [Deployment (Render)](#deployment-render)
+  - [Other Deployment Options](#other-deployment-options)
+  - [Testing & Debugging](#testing--debugging)
+  - [Troubleshooting & Common Issues](#troubleshooting--common-issues)
+  - [Contributing](#contributing)
+  - [License & Credits](#license--credits)
 
-Here is the folder structure of this app.
+---
 
-```bash
-CollabIt/
-  |- app/
-    |-- (dashboard)/
-        |--- _components/
-            |---- board-card/
-            |---- sidebar/
-            |---- board-list.tsx
-            |---- empty-boards.tsx
-            |---- empty-favourites.tsx
-            |---- empty-org.tsx
-            |---- empty-search.tsx
-            |---- invite-button.tsx
-            |---- navbar.tsx
-            |---- new-board-button.tsx
-            |---- org-sidebar.tsx
-            |---- search-input.tsx
-        |--- layout.tsx
-        |--- page.tsx
-    |-- api/liveblocks-auth/
-        |--- route.ts
-    |-- board/[boardId]/
-        |--- _components/
-            |---- canvas.tsx
-            |---- color-picker.tsx
-            |---- cursor.tsx
-            |---- cursors-presence.tsx
-            |---- ellipse.tsx
-            |---- info.tsx
-            |---- layer-preview.tsx
-            |---- loading.tsx
-            |---- note.tsx
-            |---- participants.tsx
-            |---- path.tsx
-            |---- rectangle.tsx
-            |---- selection-box.tsx
-            |---- selection-tools.tsx
-            |---- text.tsx
-            |---- tool-button.tsx
-            |---- toolbar.tsx
-            |---- user-avatar.tsx
-        |--- page.tsx
-    |-- apple-icon.png
-    |-- favicon.ico
-    |-- globals.css
-    |-- icon1.png
-    |-- icon2.png
-    |-- layout.tsx
-  |- components/
-    |-- auth/
-    |-- modals/
-    |-- ui/
-    |-- actions.tsx
-    |-- confirm-modal.tsx
-    |-- hint.tsx
-    |-- room.tsx
-  |- config/
-    |-- index.ts
-  |- convex/
-    |-- _generated/
-    |-- auth.config.js
-    |-- board.ts
-    |-- boards.ts
-    |-- schema.ts
-    |-- tsconfig.json
-  |- hooks/
-    |-- use-api-mutation.tsx
-    |-- use-disable-scroll-bounce.tsx
-    |-- use-selection-bounds.tsx
-  |- lib/
-    |-- utils.ts
-  |- providers/
-    |-- convex-client-provider.tsx
-    |-- modal-provider.tsx
-  |- public/
-    |-- placeholders/
-    |-- elements.svg
-    |-- empty-boards.svg
-    |-- empty-favourites.svg
-    |-- empty-search.svg
-    |-- logo.svg
-  |- store/
-    |-- use-rename-modal.ts
-  |- types/
-    |-- canvas.ts
-  |- .env.local
-  |- .env.local.example
-  |- .eslintrc.json
-  |- .gitignore
-  |- components.json
-  |- environment.d.ts
-  |- liveblocks.config.ts
-  |- middleware.ts
-  |- next.config.mjs
-  |- package-lock.json
-  |- package.json
-  |- postcss.config.js
-  |- tailwind.config.ts
-  |- tsconfig.json
+## Overview
+
+CollabIt provides a fast, collaborative workspace combining:
+- A React Flow-based flowchart/diagram editor with nodes and edges.
+- A drag-and-drop Kanban board for tasks, lists and cards.
+- Real-time synchronization using Liveblocks (presence + room storage).
+- Serverless backend actions and persistent data using Convex.
+- Authentication via Clerk.
+
+Use cases: pair-design sessions, team retros, brainstorming, lightweight
+planning, and sharing interactive diagrams and boards in real time.
+
+## Key Features
+
+- Real-time collaboration
+  - Shared presence cursors and basic presence metadata.
+  - Room storage that can persist the state of the flow diagram so all
+    collaborators see updates live.
+- Diagram editor (React Flow)
+  - Create, move, and connect nodes; supports custom node rendering.
+  - Node/edge sync to Liveblocks storage (when enabled) for collaborative
+    editing.
+- Kanban board
+  - Lists with card counts and progress indicators.
+  - Drag & drop card reordering and list reorder using dnd-kit.
+  - Subtle UI accents, responsive layout and accessible components.
+- Authentication and access control
+  - Clerk for sign-in, session management, and (optional) organizations.
+- Backend (Convex)
+  - Server-side functions for board persistence, permissions, and
+    business logic.
+- Uploads / Drive integration
+  - Google Drive upload modal and a central uploads route (optional).
+
+## Architecture & Tech Stack
+
+- Frontend
+  - Next.js (app directory)
+  - React 18, TypeScript
+  - Tailwind CSS for styling
+  - React Flow for diagram UI
+  - dnd-kit for drag & drop interactions
+  - Radix UI primitives (wrapped) for accessible UI
+
+- Real-time
+  - Liveblocks: presence and shared room storage for collaborative state
+    (e.g. flow nodes/edges)
+
+- Backend
+  - Convex: light-weight serverless database + functions for data
+    persistence and queries.
+
+- Auth
+  - Clerk for authentication and (optional) org management.
+
+- Other libs
+  - date-fns for humanized timestamps
+  - sonner for toasts
+  - lucide-react for icons
+
+## Folder Map (short)
+
+- `app/` — Next.js app routes and UI pages (dashboard, board, landing).
+  - `app/board/[boardId]/_components/` — board-specific components (flow,
+    canvas, toolbar, participants, etc.)
+- `components/` — shared UI pieces, modals, the `RoomProvider` wrapper
+- `convex/` — Convex functions and generated client bindings
+- `lib/` — utilities, converters (mindmap/paper export helpers)
+- `hooks/` — custom React hooks
+- `public/` — static assets
+- `types/` — shared TypeScript types
+
+For a more complete map see the original repository root or the `app/`
+directory in the source tree.
+
+## Local Development
+
+Prerequisites
+- Node.js >= 18
+- npm or yarn
+- Git
+
+Clone and install
+
+```powershell
+git clone https://github.com/krishnaMittal23/CollabIt.git
+cd CollabIt
+npm ci
+# or: yarn install
 ```
 
-<br />
+Create `.env.local` (see next section) and populate required keys.
 
-## :toolbox: Getting Started
+Run in development
 
-1. Make sure **Git** and **NodeJS** is installed.
-2. Clone this repository to your local computer.
-3. Create `.env.local` file in **root** directory.
-4. Contents of `.env.local`:
+```powershell
+npm run dev
+# or: yarn dev
+```
 
-```env
-# .env.local
+The app runs on `http://localhost:3000` by default.
 
-# disable next.js telemetry
+### Notes on running locally
+- Some features (e.g., Liveblocks auth route or Convex functions) require
+  server-side environment variables set locally. If they are missing the
+  app may fall back to a degraded experience or fail to boot.
+
+## Environment Variables
+
+The project uses several environment variables for services. Do NOT commit
+real secrets to the repository. Use platform environment variables for
+deployment.
+
+Minimum variables you will likely need locally:
+
+```text
+# Convex
+NEXT_PUBLIC_CONVEX_URL=<your_convex_public_url>
+
+# Clerk (auth)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<pk_...>
+CLERK_SECRET_KEY=<sk_...>
+CLERK_DEFAULT_ORGANIZATION_ID=<optional_org_id>
+
+# Liveblocks
+NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY=<pk_liveblocks>
+LIVEBLOCKS_SECRET_KEY=<sk_liveblocks>
+
+# Optional: Cloudinary, OpenAI/OpenRouter keys for uploads or AI features
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
+# Next.js optional
 NEXT_TELEMETRY_DISABLED=1
-
-# deployment for convex
-CONVEX_DEPLOYMENT=dev:convex-app-name # team: <your-team-name>, project: <your-project-name>
-
-# convex deployment url
-NEXT_PUBLIC_CONVEX_URL=https://convex-app-name.convex.cloud
-
-# clerk auth keys
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-CLERK_SECRET_KEY=sk_test_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-# clerk default org id
-CLERK_DEFAULT_ORGANIZATION_ID=org_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-# liveblocks api keys
-NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY=pk_dev_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-LIVEBLOCKS_SECRET_KEY=sk_dev_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
 ```
 
-### 5. Convex Deployment Configuration:
+When deploying to Render, set these values in the service's Environment
+Section (see `Deployment (Render)` below).
 
-#### a. Visit the Convex Website:
+## Collaborative Flow (React Flow + Liveblocks)
 
-- Go to the [Convex website](https://convex.cloud/) and sign in to your account.
+How it works (high level):
 
-#### b. Access Deployment Settings:
+- Each user joins a Liveblocks room via a `RoomProvider` wrapper.
+- A `flow` LiveObject (or LiveMap) is created in the room initial storage (or
+  lazily on first use) and holds the nodes and edges for that board.
+- The React Flow component reads the nodes/edges from Liveblocks storage on
+  mount and subscribes to updates. Local edits are applied to the local
+  React Flow state and then written into room storage (last-writer-wins
+  approach used unless you implement merge logic).
 
-- Navigate to the deployment settings section in your Convex account.
+Notes and tips
+- Avoid writing too frequently (throttle or debounce writes when possible).
+- Large diagrams could be sharded or stored outside Liveblocks if size is a
+  concern — Liveblocks storage is ideal for small-to-medium shared state.
 
-#### c. Retrieve Deployment Configuration:
+## Backend (Convex)
 
-- Find the deployment details, including team and project names.
-- Update the `CONVEX_DEPLOYMENT` variable in the `.env.local` file with the obtained information.
+Convex is used for persistent storage and server-side business logic. The
+`convex/` folder contains functions and the `schema.ts` describing persisted
+collections. After editing Convex functions/schema, deploy them with the
+Convex CLI and update `NEXT_PUBLIC_CONVEX_URL` to point at the deployment.
 
-### 6. Clerk Authentication Keys:
+## Deployment (Render)
 
-#### a. Visit the Clerk Website:
+Below are concise steps to deploy CollabIt to Render. You can also use
+Vercel; see the `Other Deployment Options` section.
 
-- Go to the [Clerk website](https://clerk.dev/) and sign in to your Clerk account.
+1) Prepare repo
+  - Ensure `package.json` has the following scripts:
 
-#### b. Access API Keys:
+```json
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start -p $PORT"
+  }
+```
 
-- Find the section in your Clerk account related to API keys or authentication settings.
+2) Push your code to GitHub and connect your repository in Render.
 
-#### c. Generate Keys:
+3) Create a new Web Service in Render
+  - Connect GitHub and select the repo + branch.
+  - Build Command: `npm run build`
+  - Start Command: `npm run start`
+  - Environment: Node 18+ (select the matching runtime on Render)
 
-- Generate a pair of keys (Publishable Key and Secret Key).
+4) Set Environment Variables in Render
+  - Add all keys listed in the `Environment Variables` section above.
+  - Ensure `LIVEBLOCKS_SECRET_KEY` and `CLERK_SECRET_KEY` are present for
+    server-side use.
 
-#### d. Update `.env.local`:
+5) Verify Liveblocks Auth Route
+  - The app includes an `api/liveblocks-auth/route.ts` endpoint that
+    exchanges server-side secrets. Ensure Render's runtime exposes the
+    `LIVEBLOCKS_SECRET_KEY` so this endpoint works.
 
-- Replace the `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` variables in the `.env.local` file with the keys obtained from Clerk.
+6) Deploy Convex if used
+  - Deploy Convex functions and update `NEXT_PUBLIC_CONVEX_URL` on Render to
+    point to the Convex deployment.
 
-#### e. Get Default Organization Id
+7) Test the deployed site
+  - Open the Render URL and verify signup/login, boards, and live features.
 
-- Go to Clerk Dashboard > Settings > Organizations and Enable Organizations.
-- Create a new organization, Replace the `CLERK_DEFAULT_ORGANIZATION_ID` with the newly created organization id.
+Notes
+- If you use edge functions or serverless-only features, confirm Render
+  supports those patterns for your Next.js version. Using Next.js App Router
+  pages and API routes works well with a standard Node service.
 
-### 7. Liveblocks API Keys:
+## Other Deployment Options
 
-#### a. Visit the Liveblocks Website:
+- Vercel: easiest for Next.js; supports App Router and serverless functions.
+- Fly / Railway: also possible but check Convex and Liveblocks network access
+  from those platforms.
 
-- Go to the [Liveblocks website](https://liveblocks.io/) and sign in to your Liveblocks account.
+## Testing & Debugging
 
-#### b. Access API Keys:
+Run tests (if any):
 
-- Navigate to your Liveblocks account settings or API keys section.
+```powershell
+npm test
+# or run specific convext tests / unit tests in your setup
+```
 
-#### c. Generate Keys:
+Useful debugging tips
+- Check `next build` locally to reproduce production build errors:
 
-- Generate a pair of keys (Public Key and Secret Key) for development.
+```powershell
+npm run build
+```
 
-#### d. Update `.env.local`:
+- If `npm run dev` fails with exit code 1, open `stdout` / server logs and the
+  terminal messages for the failing module.
+- Missing environment variables commonly cause boot-time errors; ensure
+  server-side secret keys are set.
 
-- Replace the `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY` and `LIVEBLOCKS_SECRET_KEY` variables in the `.env.local` file with the Liveblocks API keys obtained.
+## Troubleshooting & Common Issues
 
-### 8. Save and Secure:
+- Dev server fail (exit code 1)
+  - Run `npm run build` locally and fix the compile-time error shown in the
+    terminal. Common causes: missing env variables, TypeScript errors, or
+    invalid imports.
 
-- Save the changes to the `.env.local` file.
+- Dropdowns or overlay clickability issues
+  - These are usually z-index or CSS stacking context problems (Tailwind
+    or global styles). Inspect the element with devtools and adjust the
+    `z-index` or `pointer-events` styles on the menu wrapper.
 
-9. Install Project Dependencies using `npm install --legacy-peer-deps` or `yarn install --legacy-peer-deps`.
-10. Now app is fully configured 👍 and you can start using this app using either one of `npm run dev` or `yarn dev`.
+- Liveblocks sync not working
+  - Verify your `LIVEBLOCKS_PUBLIC_KEY` on the client and `LIVEBLOCKS_SECRET_KEY`
+    on the server. Ensure the `/api/liveblocks-auth` endpoint is reachable by
+    the client and returning a valid token.
 
-**NOTE:** Please make sure to keep your API keys and configuration values secure and do not expose them publicly.
+- React Flow issues
+  - Make sure nodes/edges are serializable to the Liveblocks storage. Avoid
+    functions or circular references. Use JSON-friendly node data.
 
-## :camera: Screenshots
+## Contributing
 
+Thanks for considering contributions!
 
+How to contribute
+1. Fork the repo.
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Make changes and add tests if applicable.
+4. Open a pull request describing your change.
 
-## :gear: Tech Stack
+Please avoid committing secrets or `.env.local` files. If your change needs
+environment values, document them in the README and provide safe defaults
+or `example.env` files.
 
-[![React JS](https://skillicons.dev/icons?i=react "React JS")](https://react.dev/ "React JS") [![Next JS](https://skillicons.dev/icons?i=next "Next JS")](https://nextjs.org/ "Next JS") [![Typescript](https://skillicons.dev/icons?i=ts "Typescript")](https://www.typescriptlang.org/ "Typescript") [![Tailwind CSS](https://skillicons.dev/icons?i=tailwind "Tailwind CSS")](https://tailwindcss.com/ "Tailwind CSS") [![Vercel](https://skillicons.dev/icons?i=vercel "Vercel")](https://vercel.app/ "Vercel") [![MySQL](https://skillicons.dev/icons?i=mysql "MySQL")](https://mysql.com/ "MySQL")
+## Code of Conduct
 
+This project follows a Code of Conduct. Please be respectful and open to
+feedback.
 
+## License & Credits
 
-## :raised_hands: Contribute
+This repository includes a `LICENSE` file in the project root. Please refer
+to it for license terms.
 
-You might encounter some bugs while using this app. You are more than welcome to contribute. Just submit changes via pull request and I will review them before merging. Make sure you follow community guidelines.
+Credits
+- Built with Next.js + Convex + Liveblocks + React Flow.
+- Inspired by community examples and OSS projects.
 
+---
 
-## :books: Learn More
+If you want, I can now:
+- commit the README change and create a branch for review, or
+- keep this change local and show a diff for review before committing.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## :page_with_curl: Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-
-## :star: Give A Star
-
-You can also give this repository a star to show more people and they can use this repository.
-
-
-
-<br />
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

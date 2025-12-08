@@ -144,9 +144,9 @@ export const Info = ({ boardId }: InfoProps) => {
         </div>
       </Actions>
 
-      <TabSeparator />
+      {/* <TabSeparator /> */}
 
-      <ThemeToggle />
+      {/* <ThemeToggle /> */}
     </div>
   );
 };
