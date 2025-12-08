@@ -11,6 +11,11 @@ export type Camera = {
 };
 
 export enum LayerType {
+    GoogleDocEmbed,
+  GoogleSheetEmbed,
+  GoogleSlidesEmbed,
+  ImageEmbed,
+  VideoEmbed,
   Rectangle,
   Ellipse,
   Path,
@@ -45,6 +50,54 @@ export enum LayerType {
   WireText,
   WireCheckbox,
 }
+
+
+export type GoogleDocEmbedLayer = {
+  type: LayerType.GoogleDocEmbed;
+  x: number;
+  y: number;
+  height: number;
+  width: number;
+  fill: Color;
+  stroke?: Color;
+  strokeWidth?: number;
+  documentId: string;
+  title: string;
+  embeddableLink: string;
+};
+
+
+
+export type GoogleSheetEmbedLayer = {
+  type: LayerType.GoogleSheetEmbed;
+  x: number;
+  y: number;
+  height: number;
+  width: number;
+  fill: Color;
+  stroke?: Color;
+  strokeWidth?: number;
+  spreadsheetId: string;
+  title: string;
+  sheetIndex?: number;
+};
+
+export type ImageEmbedLayer = {
+  type: LayerType.ImageEmbed;
+  x: number;
+  y: number;
+  height: number;
+  width: number;
+  fill: Color;
+  stroke?: Color;
+  strokeWidth?: number;
+  fileId: string;
+  fileName: string;
+  imageUrl: string;
+};
+
+export type GoogleDriveEmbedLayer = GoogleDocEmbedLayer | GoogleSheetEmbedLayer | ImageEmbedLayer;
+
 
 export type RectangleLayer = {
   type: LayerType.Rectangle;

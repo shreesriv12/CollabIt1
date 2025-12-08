@@ -13,6 +13,12 @@ body,
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
+      /* Dark theme styles */
+  [data-theme='dark'] {
+    --background: 222.2 84% 4.9%; /* Dark theme background */
+    --foreground: 0 0% 100%; /* Dark theme foreground */
+  }
+
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
 
@@ -229,3 +235,21 @@ body,
     background: rgba(107, 114, 128, 0.7);
   }
 }
+
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 1000px 100%;
+}
+

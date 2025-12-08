@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { colorToCSS } from "@/lib/utils";
 import type { AdvancedShapeLayer } from "@/types/canvas";
 import { LayerType } from "@/types/canvas";
@@ -18,6 +18,34 @@ export const AdvancedShape = ({
   onPointerDown,
   selectionColor,
 }: AdvancedShapeProps) => {
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
+
+  // Initialize theme from localStorage or system preference
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const shouldBeDark = savedTheme ? savedTheme === "dark" : prefersDark;
+    
+    setIsDarkTheme(shouldBeDark);
+    applyTheme(shouldBeDark);
+  }, []);
+
+  const applyTheme = (isDark: boolean) => {
+    const htmlElement = document.documentElement;
+    if (isDark) {
+      htmlElement.classList.add("dark");
+    } else {
+      htmlElement.classList.remove("dark");
+    }
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+  };
+
+  const toggleTheme = () => {
+    const newTheme = !isDarkTheme;
+    setIsDarkTheme(newTheme);
+    applyTheme(newTheme);
+  };
+
   const { x, y, width, height, fill, stroke, strokeWidth, type, value } = layer;
 
   const fillColor = fill ? colorToCSS(fill) : "#CCC";
@@ -33,6 +61,7 @@ export const AdvancedShape = ({
             fill={fillColor}
             stroke={strokeColor}
             strokeWidth={strokeW}
+            style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}
           />
         );
 
@@ -43,6 +72,7 @@ export const AdvancedShape = ({
             fill={fillColor}
             stroke={strokeColor}
             strokeWidth={strokeW}
+            style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}
           />
         );
 
@@ -53,6 +83,7 @@ export const AdvancedShape = ({
             fill={fillColor}
             stroke={strokeColor}
             strokeWidth={strokeW}
+            style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}
           />
         );
 
@@ -75,6 +106,7 @@ export const AdvancedShape = ({
             fill={fillColor}
             stroke={strokeColor}
             strokeWidth={strokeW}
+            style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}
           />
         );
 
@@ -85,6 +117,7 @@ export const AdvancedShape = ({
             fill={fillColor}
             stroke={strokeColor}
             strokeWidth={strokeW}
+            style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}
           />
         );
 
@@ -95,6 +128,7 @@ export const AdvancedShape = ({
             fill={fillColor}
             stroke={strokeColor}
             strokeWidth={strokeW}
+            style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}
           />
         );
 
@@ -105,6 +139,7 @@ export const AdvancedShape = ({
             fill={fillColor}
             stroke={strokeColor}
             strokeWidth={strokeW}
+            style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}
           />
         );
 
@@ -119,6 +154,7 @@ export const AdvancedShape = ({
             fill={fillColor}
             stroke={strokeColor}
             strokeWidth={strokeW}
+            style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}
           />
         );
 
@@ -131,6 +167,7 @@ export const AdvancedShape = ({
             stroke={strokeColor}
             strokeWidth={strokeW}
             rx={5}
+            style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}
           />
         );
 
@@ -141,6 +178,7 @@ export const AdvancedShape = ({
             fill={fillColor}
             stroke={strokeColor}
             strokeWidth={strokeW}
+            style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}
           />
         );
 
@@ -151,12 +189,13 @@ export const AdvancedShape = ({
             fill={fillColor}
             stroke={strokeColor}
             strokeWidth={strokeW}
+            style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}
           />
         );
 
       case LayerType.FlowDatabase:
         return (
-          <g>
+          <g style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}>
             <ellipse
               cx={width/2}
               cy={height*0.15}
@@ -196,13 +235,14 @@ export const AdvancedShape = ({
             fill={fillColor}
             stroke={strokeColor}
             strokeWidth={strokeW}
+            style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}
           />
         );
 
       // UML shapes
       case LayerType.UMLClass:
         return (
-          <g>
+          <g style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}>
             <rect
               width={width}
               height={height}
@@ -232,7 +272,7 @@ export const AdvancedShape = ({
 
       case LayerType.UMLInterface:
         return (
-          <g>
+          <g style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}>
             <circle
               cx={width/2}
               cy={height*0.2}
@@ -256,7 +296,7 @@ export const AdvancedShape = ({
 
       case LayerType.UMLActor:
         return (
-          <g>
+          <g style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}>
             <circle
               cx={width/2}
               cy={height*0.15}
@@ -310,13 +350,14 @@ export const AdvancedShape = ({
             fill={fillColor}
             stroke={strokeColor}
             strokeWidth={strokeW}
+            style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}
           />
         );
 
       // Wireframe components
       case LayerType.WireButton:
         return (
-          <g>
+          <g style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}>
             <rect
               width={width}
               height={height}
@@ -340,7 +381,7 @@ export const AdvancedShape = ({
 
       case LayerType.WireInput:
         return (
-          <g>
+          <g style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}>
             <rect
               width={width}
               height={height}
@@ -418,7 +459,7 @@ export const AdvancedShape = ({
 
         // fallback wireframe if no image data is present
         return (
-          <g>
+          <g style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}>
             <rect
               width={width}
               height={height}
@@ -448,7 +489,7 @@ export const AdvancedShape = ({
 
       case LayerType.WireText:
         return (
-          <g>
+          <g style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}>
             <rect
               width={width}
               height={height}
@@ -474,7 +515,7 @@ export const AdvancedShape = ({
 
       case LayerType.WireCheckbox:
         return (
-          <g>
+          <g style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))" }}>
             <rect
               x={0}
               y={height*0.3}
@@ -504,11 +545,11 @@ export const AdvancedShape = ({
 
   return (
     <g
-      className="drop-shadow-md"
       onPointerDown={(e) => onPointerDown(e, id)}
       style={{
         transform: `translate(${x}px, ${y}px)`,
         cursor: "move",
+        transition: "all 0.2s ease",
       }}
     >
       {renderShape()}
@@ -519,8 +560,13 @@ export const AdvancedShape = ({
           textAnchor="middle"
           dominantBaseline="middle"
           fontSize="12"
+          fontWeight="500"
           fill={strokeColor}
           pointerEvents="none"
+          style={{
+            textShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+            letterSpacing: "0.3px",
+          }}
         >
           {value}
         </text>
