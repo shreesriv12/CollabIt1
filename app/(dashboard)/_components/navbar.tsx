@@ -8,6 +8,7 @@ import {
 
 import { InviteButton } from "./invite-button";
 import { SearchInput } from "./search-input";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const Navbar = () => {
   const { organization, membership } = useOrganization();
@@ -47,6 +48,7 @@ export const Navbar = () => {
       </div>
 
       {!!organization && membership?.role === "org:admin" && <InviteButton />}
+      <ThemeToggle />
       <UserButton />
     </div>
   );
