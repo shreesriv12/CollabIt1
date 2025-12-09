@@ -32,10 +32,10 @@ export const AnalyticsDashboard = ({ boardId }: AnalyticsDashboardProps) => {
             <BarChart3 className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Board Analytics
-            </h1>
-            <p className="text-gray-600 text-sm">Track your board's activity and performance</p>
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+            Board Analytics
+          </h2>
+          <p className="text-gray-600 text-sm">Track your board&apos;s activity and performance</p>
           </div>
         </div>
 

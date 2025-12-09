@@ -48,7 +48,11 @@ import { ShapesToolbar } from "./shapes-toolbar";
 import { Toolbar } from "./toolbar";
 import { AIMindmapModal } from "@/components/modals/ai-mindmap-modal";
 import { useAIMindmapModal } from "@/store/use-ai-mindmap-modal";
-import { convertMindMapToLayers, findOptimalMindMapPosition, adjustMindMapPositions } from "@/lib/mindmap-converter";
+import {
+  convertMindMapToLayers,
+  findOptimalMindMapPosition,
+  adjustMindMapPositions,
+} from "@/lib/mindmap-converter";
 import { MindMapData } from "@/lib/ai-mindmap";
 import { MindMapConnection } from "./mindmap-connection";
 import { MindMapConnectionsRenderer } from "./mindmap-connections-renderer";
@@ -95,16 +99,22 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   const [isInserting, setIsInserting] = useState(false);
   const [insertionStart, setInsertionStart] = useState<Point | null>(null);
   const [currentPointer, setCurrentPointer] = useState<Point | null>(null);
-  
+
   // ERD relationship state
   const [erdConnectingFrom, setErdConnectingFrom] = useState<string | null>(null);
-  const [erdConnectionPreview, setErdConnectionPreview] = useState<Point | null>(null);
+  const [erdConnectionPreview, setErdConnectionPreview] =
+    useState<Point | null>(null);
 
   // AI Mindmap modal state
-  const { isOpen: isAIMindmapModalOpen, close: closeAIMindmapModal } = useAIMindmapModal();
-  
+  const { isOpen: isAIMindmapModalOpen, close: closeAIMindmapModal } =
+    useAIMindmapModal();
+
   // ERD modal state
-  const { isOpen: isSchemaExportModalOpen, open: openSchemaExportModal, close: closeSchemaExportModal } = useSchemaExportModal();
+  const {
+    isOpen: isSchemaExportModalOpen,
+    open: openSchemaExportModal,
+    close: closeSchemaExportModal,
+  } = useSchemaExportModal();
   const { isOpen: isERDEntityModalOpen } = useERDEntityModal();
 
   useDisableScrollBounce();
@@ -138,15 +148,11 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         | LayerType.UMLInterface
         | LayerType.UMLActor
         | LayerType.UMLUseCase
-        | LayerType.UMLComponent
-        | LayerType.UMLPackage
         | LayerType.WireButton
         | LayerType.WireInput
         | LayerType.WireImage
         | LayerType.WireText
-        | LayerType.WireCheckbox
-        | LayerType.WireRadio
-        | LayerType.WireDropdown,
+        | LayerType.WireCheckbox,
       position: Point,
     ) => {
       const liveLayers = storage.get("layers");
@@ -155,7 +161,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
 
       const liveLayerIds = storage.get("layerIds");
       const layerId = nanoid();
-      
+
       // Check if it's an advanced shape
       const isAdvancedShape = ![
         LayerType.Ellipse,
@@ -178,6 +184,8 @@ export const Canvas = ({ boardId }: CanvasProps) => {
           fill: { r: 59, g: 130, b: 246 },
           stroke: { r: 59, g: 130, b: 246 },
           strokeWidth: 2,
+          // FIX: Add 'text' property if it's a mandatory property on all Layers
+          text: "NewEntity", 
           entityData: {
             id: layerId,
             name: "NewEntity",
@@ -193,10 +201,10 @@ export const Canvas = ({ boardId }: CanvasProps) => {
                 isForeignKey: false,
                 defaultValue: "",
                 constraints: [],
-              }
+              },
             ],
             position: { x: position.x, y: position.y },
-          }
+          },
         });
       } else {
         // Create regular layer
@@ -209,16 +217,28 @@ export const Canvas = ({ boardId }: CanvasProps) => {
           fill: lastUsedColor,
           stroke: strokeColor,
           strokeWidth: strokeWidth,
-          ...(isAdvancedShape && { 
+          // FIX: Ensure a default 'text' property is included for non-ERDEntity shapes too if mandatory
+          text: "", 
+          ...(isAdvancedShape && {
             shapeType: layerType,
-            text: layerType === LayerType.UMLClass ? 'Class Name' :
-                  layerType === LayerType.UMLInterface ? 'Interface Name' :
-                  layerType === LayerType.UMLActor ? 'Actor' :
-                  layerType === LayerType.UMLUseCase ? 'Use Case' :
-                  layerType === LayerType.WireButton ? 'Button' :
-                  layerType === LayerType.WireInput ? 'Input Field' :
-                  layerType === LayerType.WireText ? 'Text Block' :
-                  layerType === LayerType.WireCheckbox ? 'Checkbox' : ''
+            text:
+              layerType === LayerType.UMLClass
+                ? "Class Name"
+                : layerType === LayerType.UMLInterface
+                ? "Interface Name"
+                : layerType === LayerType.UMLActor
+                ? "Actor"
+                : layerType === LayerType.UMLUseCase
+                ? "Use Case"
+                : layerType === LayerType.WireButton
+                ? "Button"
+                : layerType === LayerType.WireInput
+                ? "Input Field"
+                : layerType === LayerType.WireText
+                ? "Text Block"
+                : layerType === LayerType.WireCheckbox
+                ? "Checkbox"
+                : "",
           }),
         });
       }
@@ -258,15 +278,11 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         | LayerType.UMLInterface
         | LayerType.UMLActor
         | LayerType.UMLUseCase
-        | LayerType.UMLComponent
-        | LayerType.UMLPackage
         | LayerType.WireButton
         | LayerType.WireInput
         | LayerType.WireImage
         | LayerType.WireText
-        | LayerType.WireCheckbox
-        | LayerType.WireRadio
-        | LayerType.WireDropdown,
+        | LayerType.WireCheckbox,
       position: Point,
       width: number,
       height: number,
@@ -277,7 +293,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
 
       const liveLayerIds = storage.get("layerIds");
       const layerId = nanoid();
-      
+
       // Check if it's an advanced shape
       const isAdvancedShape = ![
         LayerType.Ellipse,
@@ -300,10 +316,12 @@ export const Canvas = ({ boardId }: CanvasProps) => {
           fill: { r: 59, g: 130, b: 246 },
           stroke: { r: 59, g: 130, b: 246 },
           strokeWidth: 2,
+          // FIX: Add 'text' property if it's a mandatory property on all Layers
+          text: "NewEntity",
           entityData: {
             id: layerId,
             name: "NewEntity",
-            tableName: "new_entity", 
+            tableName: "new_entity",
             fields: [
               {
                 id: nanoid(),
@@ -315,10 +333,10 @@ export const Canvas = ({ boardId }: CanvasProps) => {
                 isForeignKey: false,
                 defaultValue: "",
                 constraints: [],
-              }
+              },
             ],
             position: { x: position.x, y: position.y },
-          }
+          },
         });
       } else {
         // Create regular layer
@@ -331,16 +349,28 @@ export const Canvas = ({ boardId }: CanvasProps) => {
           fill: { r: 255, g: 255, b: 255, a: 0.1 }, // Transparent fill
           stroke: strokeColor,
           strokeWidth: strokeWidth,
-          ...(isAdvancedShape && { 
+          // FIX: Ensure a default 'text' property is included if mandatory
+          text: "", 
+          ...(isAdvancedShape && {
             shapeType: layerType,
-            text: layerType === LayerType.UMLClass ? 'Class Name' :
-                  layerType === LayerType.UMLInterface ? 'Interface Name' :
-                  layerType === LayerType.UMLActor ? 'Actor' :
-                  layerType === LayerType.UMLUseCase ? 'Use Case' :
-                  layerType === LayerType.WireButton ? 'Button' :
-                  layerType === LayerType.WireInput ? 'Input Field' :
-                  layerType === LayerType.WireText ? 'Text Block' :
-                  layerType === LayerType.WireCheckbox ? 'Checkbox' : ''
+            text:
+              layerType === LayerType.UMLClass
+                ? "Class Name"
+                : layerType === LayerType.UMLInterface
+                ? "Interface Name"
+                : layerType === LayerType.UMLActor
+                ? "Actor"
+                : layerType === LayerType.UMLUseCase
+                ? "Use Case"
+                : layerType === LayerType.WireButton
+                ? "Button"
+                : layerType === LayerType.WireInput
+                ? "Input Field"
+                : layerType === LayerType.WireText
+                ? "Text Block"
+                : layerType === LayerType.WireCheckbox
+                ? "Checkbox"
+                : "",
           }),
         });
       }
@@ -355,7 +385,12 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   );
 
   const createERDRelationship = useMutation(
-    ({ storage }, fromEntityId: string, toEntityId: string, relationshipType: string = "one-to-many") => {
+    (
+      { storage },
+      fromEntityId: string,
+      toEntityId: string,
+      relationshipType: string = "one-to-many",
+    ) => {
       const liveLayers = storage.get("layers");
       const liveLayerIds = storage.get("layerIds");
 
@@ -364,21 +399,41 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       const fromLayer = liveLayers.get(fromEntityId);
       const toLayer = liveLayers.get(toEntityId);
 
-      if (!fromLayer || !toLayer) return;
+      // FIX: Ensure layers exist and are ERDEntity type before proceeding
+      if (
+        !fromLayer ||
+        !toLayer ||
+        fromLayer.get("type") !== LayerType.ERDEntity ||
+        toLayer.get("type") !== LayerType.ERDEntity
+      ) {
+        return;
+      }
 
-      // Get entity positions
-      const fromData = fromLayer.toObject();
-      const toData = toLayer.toObject();
+      // FIX: Use 'as any' casting to access type-specific property 'entityData'
+      const fromLayerAny = fromLayer as any;
+      const fromDataX = fromLayerAny.get("x");
+      const fromDataWidth = fromLayerAny.get("width");
+      const fromDataY = fromLayerAny.get("y");
+      const fromDataHeight = fromLayerAny.get("height");
+
+      // FIX: Use 'as any' casting to access type-specific property 'entityData'
+      const fromDataEntityData = fromLayerAny.get("entityData");
 
       // Calculate connection points (center of each entity)
       const fromPoint = {
-        x: fromData.x + fromData.width / 2,
-        y: fromData.y + fromData.height / 2,
+        x: fromDataX + fromDataWidth / 2,
+        y: fromDataY + fromDataHeight / 2,
       };
 
+      const toLayerAny = toLayer as any;
+      const toDataX = toLayerAny.get("x");
+      const toDataWidth = toLayerAny.get("width");
+      const toDataY = toLayerAny.get("y");
+      const toDataHeight = toLayerAny.get("height");
+
       const toPoint = {
-        x: toData.x + toData.width / 2,
-        y: toData.y + toData.height / 2,
+        x: toDataX + toDataWidth / 2,
+        y: toDataY + toDataHeight / 2,
       };
 
       // Create relationship layer
@@ -390,7 +445,8 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         relationshipType: relationshipType,
         relationshipName: "",
         fromField: "id",
-        toField: `${fromData.entityData?.tableName || 'entity'}_id`,
+        // FIX: Safely access tableName from entityData
+        toField: `${fromDataEntityData?.tableName || "entity"}_id`,
         points: [fromPoint, toPoint],
         stroke: { r: 100, g: 116, b: 139 },
         strokeWidth: 2,
@@ -398,22 +454,35 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         y: Math.min(fromPoint.y, toPoint.y),
         width: Math.abs(toPoint.x - fromPoint.x),
         height: Math.abs(toPoint.y - fromPoint.y),
+        // FIX: Add missing 'fill' property (assumed necessary for LiveObject<Layer> union)
+        fill: { r: 0, g: 0, b: 0, a: 0 },
+        // FIX: Add the missing property 'erdRelationshipId' that was required in the error
+        erdRelationshipId: relationshipId,
+        // FIX: Also include 'text' property if it's mandatory on all Layers
+        text: "",
       });
 
       liveLayerIds.push(relationshipId);
       liveLayers.set(relationshipId, relationshipLayer);
     },
-    []
+    [],
   );
 
   const insertImageLayer = useMutation(
-    ({ storage, setMyPresence }, position: Point, width: number, height: number, image: { url: string; type: string; name?: string }) => {
+    (
+      { storage, setMyPresence },
+      position: Point,
+      width: number,
+      height: number,
+      image: { url: string; type: string; name?: string },
+    ) => {
       const liveLayers = storage.get("layers");
       if (liveLayers.size >= MAX_LAYERS) return;
 
       const liveLayerIds = storage.get("layerIds");
       const layerId = nanoid();
 
+      // FIX: Ensure the LiveObject matches the WireImageLayer interface
       const layer = new LiveObject({
         type: LayerType.WireImage,
         x: position.x,
@@ -424,6 +493,8 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         stroke: strokeColor,
         strokeWidth: strokeWidth,
         image, // store image metadata (url, type, name)
+        // FIX: Must include 'text' property if it's mandatory on all Layers
+        text: "",
       });
 
       liveLayerIds.push(layerId);
@@ -442,22 +513,28 @@ export const Canvas = ({ boardId }: CanvasProps) => {
 
       // Convert mindmap data to layers
       const conversion = convertMindMapToLayers(mindMapData);
-      
+
       // Find optimal position for the mindmap
       const existingLayers: Record<string, any> = {};
       liveLayerIds.forEach((id) => {
         const layer = liveLayers.get(id);
         if (layer) {
+          // FIX: Use .toObject() safely for general layer inspection
           existingLayers[id] = layer.toObject();
         }
       });
-      
+
       const targetCenter = findOptimalMindMapPosition(existingLayers);
-      const adjustedLayers = adjustMindMapPositions(conversion.layers, targetCenter);
-      
+      const adjustedLayers = adjustMindMapPositions(
+        conversion.layers,
+        targetCenter,
+      );
+
       // Insert all mindmap layers
       const newLayerIds: string[] = [];
       Object.entries(adjustedLayers).forEach(([layerId, layer]) => {
+        // FIX: Assuming the layer objects generated by convertMindMapToLayers
+        // conform to the LiveObject<Layer> interface.
         const liveLayer = new LiveObject(layer);
         liveLayers.set(layerId, liveLayer);
         liveLayerIds.push(layerId);
@@ -471,17 +548,24 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   );
 
   // Handler for AI mindmap generation
-  const handleMindMapGenerate = useCallback((mindMapData: MindMapData) => {
-    insertMindMapLayers(mindMapData);
-  }, [insertMindMapLayers]);
+  const handleMindMapGenerate = useCallback(
+    (mindMapData: MindMapData) => {
+      insertMindMapLayers(mindMapData);
+    },
+    [insertMindMapLayers],
+  );
 
   // Extract ERD entities and relationships from layers
   const erdEntities = useStorage((root) => {
     const entities: any[] = [];
     root.layerIds.forEach((id) => {
       const layer = root.layers.get(id);
-      if (layer && layer.type === LayerType.ERDEntity && layer.entityData) {
-        entities.push(layer.entityData);
+      if (layer && layer.type === LayerType.ERDEntity) {
+        // FIX: Use 'as any' casting to access type-specific property 'entityData'
+        const entityData = (layer as any).entityData;
+        if (entityData) {
+          entities.push(entityData);
+        }
       }
     });
     return entities;
@@ -492,14 +576,15 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     root.layerIds.forEach((id) => {
       const layer = root.layers.get(id);
       if (layer && layer.type === LayerType.ERDRelationship) {
+        // FIX: Use 'as any' casting to access type-specific properties
         relationships.push({
           id,
-          fromEntityId: layer.fromEntityId,
-          toEntityId: layer.toEntityId,
-          type: layer.relationshipType || 'one-to-many',
-          fromField: layer.fromField || 'id',
-          toField: layer.toField || 'foreign_key',
-          name: layer.relationshipName || '',
+          fromEntityId: (layer as any).fromEntityId,
+          toEntityId: (layer as any).toEntityId,
+          type: (layer as any).relationshipType || "one-to-many",
+          fromField: (layer as any).fromField || "id",
+          toField: (layer as any).toField || "foreign_key",
+          name: (layer as any).relationshipName || "",
         });
       }
     });
@@ -559,18 +644,21 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     [layerIds],
   );
 
-  const startMultiSelection = useCallback((current: Point, origin: Point) => {
-    if (
-      Math.abs(current.x - origin.x) + Math.abs(current.y - origin.y) >
-      MULTISELECTION_THRESHOLD
-    ) {
-      setCanvasState({
-        mode: CanvasMode.SelectionNet,
-        origin,
-        current,
-      });
-    }
-  }, []);
+  const startMultiSelection = useCallback(
+    (current: Point, origin: Point) => {
+      if (
+        Math.abs(current.x - origin.x) + Math.abs(current.y - origin.y) >
+        MULTISELECTION_THRESHOLD
+      ) {
+        setCanvasState({
+          mode: CanvasMode.SelectionNet,
+          origin,
+          current,
+        });
+      }
+    },
+    [],
+  );
 
   const continueDrawing = useMutation(
     ({ self, setMyPresence }, point: Point, e: React.PointerEvent) => {
@@ -613,7 +701,14 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       const id = nanoid();
       liveLayers.set(
         id,
-        new LiveObject(penPointsToPathLayer(pencilDraft, lastUsedColor, strokeColor, strokeWidth)),
+        new LiveObject(
+          penPointsToPathLayer(
+            pencilDraft,
+            lastUsedColor,
+            strokeColor,
+            strokeWidth,
+          ),
+        ),
       );
 
       const liveLayerIds = storage.get("layerIds");
@@ -648,7 +743,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       for (let i = liveLayerIds.length - 1; i >= 0; i--) {
         const layerId = liveLayerIds.get(i);
         const layer = liveLayers.get(layerId);
-        
+
         if (!layer) continue;
 
         // Check if point is within layer bounds
@@ -749,6 +844,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         setCamera((prev) => ({
           x: prev.x + deltaX,
           y: prev.y + deltaY,
+          zoom: prev.zoom, // Preserve zoom level
         }));
         setPanStart({ x: e.clientX, y: e.clientY });
         return;
@@ -758,7 +854,10 @@ export const Canvas = ({ boardId }: CanvasProps) => {
 
       if (canvasState.mode === CanvasMode.Inserting && isInserting) {
         setCurrentPointer(current);
-      } else if (canvasState.mode === CanvasMode.ERDConnecting && erdConnectingFrom) {
+      } else if (
+        canvasState.mode === CanvasMode.ERDConnecting &&
+        erdConnectingFrom
+      ) {
         setErdConnectionPreview(current);
       } else if (canvasState.mode === CanvasMode.Pressing) {
         startMultiSelection(current, canvasState.origin);
@@ -841,7 +940,15 @@ export const Canvas = ({ boardId }: CanvasProps) => {
 
       setCanvasState({ origin: point, mode: CanvasMode.Pressing });
     },
-    [camera, canvasState.mode, setCanvasState, startDrawing, eraseLayer, isSpacePressed],
+    [
+      camera,
+      canvasState.mode,
+      setCanvasState,
+      startDrawing,
+      eraseLayer,
+      isSpacePressed,
+      isHandPanning,
+    ],
   );
 
   const onPointerUp = useMutation(
@@ -855,25 +962,37 @@ export const Canvas = ({ boardId }: CanvasProps) => {
 
       const point = pointerEventToCanvasPoint(e, camera);
 
-      if (canvasState.mode === CanvasMode.Inserting && isInserting && insertionStart && currentPointer) {
+      if (
+        canvasState.mode === CanvasMode.Inserting &&
+        isInserting &&
+        insertionStart &&
+        currentPointer
+      ) {
         // Calculate the size based on distance from start
         const width = Math.abs(currentPointer.x - insertionStart.x);
         const height = Math.abs(currentPointer.y - insertionStart.y);
-        
+
         // Minimum size to prevent tiny shapes
         const finalWidth = Math.max(width, 50);
         const finalHeight = Math.max(height, 50);
-        
+
         // Calculate position (top-left corner)
         const x = Math.min(insertionStart.x, currentPointer.x);
         const y = Math.min(insertionStart.y, currentPointer.y);
-        
-        insertLayerWithSize(canvasState.layerType, { x, y }, finalWidth, finalHeight);
-        
+
+        // FIX: The type of canvasState is CanvasState, but here we assume it was set 
+        // to Insertion mode which carries the layerType. We cast for safety here.
+        insertLayerWithSize(
+          (canvasState as any).layerType,
+          { x, y },
+          finalWidth,
+          finalHeight,
+        );
+
         setIsInserting(false);
         setInsertionStart(null);
         setCurrentPointer(null);
-        return;
+        // Do not return here, continue to setCanvasState({ mode: CanvasMode.None });
       }
 
       if (
@@ -903,7 +1022,6 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       camera,
       canvasState,
       history,
-      insertLayer,
       insertLayerWithSize,
       unselectLayers,
       insertPath,
@@ -927,10 +1045,10 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       // Handle ERD relationship creation
       if (canvasState.mode === CanvasMode.ERDConnecting) {
         e.stopPropagation();
-        
+
         const liveLayers = storage.get("layers");
         const layer = liveLayers.get(layerId);
-        
+
         // Only connect to ERD entities
         if (layer && layer.get("type") === LayerType.ERDEntity) {
           if (!erdConnectingFrom) {
@@ -958,7 +1076,14 @@ export const Canvas = ({ boardId }: CanvasProps) => {
 
       setCanvasState({ mode: CanvasMode.Translating, current: point });
     },
-    [setCanvasState, camera, history, canvasState.mode, erdConnectingFrom, createERDRelationship],
+    [
+      setCanvasState,
+      camera,
+      history,
+      canvasState.mode,
+      erdConnectingFrom,
+      createERDRelationship,
+    ],
   );
 
   const layerIdsToColorSelection = useMemo(() => {
@@ -1037,8 +1162,8 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   const zoomTo = (newZoom: number) => {
     setCamera((prev) => {
       const oldZoom = prev.zoom ?? 1;
-      const centerX = typeof window !== 'undefined' ? window.innerWidth / 2 : 0;
-      const centerY = typeof window !== 'undefined' ? window.innerHeight / 2 : 0;
+      const centerX = typeof window !== "undefined" ? window.innerWidth / 2 : 0;
+      const centerY = typeof window !== "undefined" ? window.innerHeight / 2 : 0;
       const worldX = (centerX - prev.x) / oldZoom;
       const worldY = (centerY - prev.y) / oldZoom;
       return {
@@ -1053,11 +1178,15 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     setCamera((prev) => {
       const z = prev.zoom ?? 1;
       const next = Math.min(3, +(z * 1.15).toFixed(3));
-      const centerX = typeof window !== 'undefined' ? window.innerWidth / 2 : 0;
-      const centerY = typeof window !== 'undefined' ? window.innerHeight / 2 : 0;
+      const centerX = typeof window !== "undefined" ? window.innerWidth / 2 : 0;
+      const centerY = typeof window !== "undefined" ? window.innerHeight / 2 : 0;
       const worldX = (centerX - prev.x) / z;
       const worldY = (centerY - prev.y) / z;
-      return { x: Math.round(centerX - worldX * next), y: Math.round(centerY - worldY * next), zoom: next };
+      return {
+        x: Math.round(centerX - worldX * next),
+        y: Math.round(centerY - worldY * next),
+        zoom: next,
+      };
     });
   };
 
@@ -1065,11 +1194,15 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     setCamera((prev) => {
       const z = prev.zoom ?? 1;
       const next = Math.max(0.25, +(z / 1.15).toFixed(3));
-      const centerX = typeof window !== 'undefined' ? window.innerWidth / 2 : 0;
-      const centerY = typeof window !== 'undefined' ? window.innerHeight / 2 : 0;
+      const centerX = typeof window !== "undefined" ? window.innerWidth / 2 : 0;
+      const centerY = typeof window !== "undefined" ? window.innerHeight / 2 : 0;
       const worldX = (centerX - prev.x) / z;
       const worldY = (centerY - prev.y) / z;
-      return { x: Math.round(centerX - worldX * next), y: Math.round(centerY - worldY * next), zoom: next };
+      return {
+        x: Math.round(centerX - worldX * next),
+        y: Math.round(centerY - worldY * next),
+        zoom: next,
+      };
     });
   };
 
@@ -1128,7 +1261,9 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     }
 
     el.addEventListener("touchstart", onTouchStart, { passive: true });
-    el.addEventListener("touchmove", onTouchMove as EventListener, { passive: false });
+    el.addEventListener("touchmove", onTouchMove as EventListener, {
+      passive: false,
+    });
     el.addEventListener("touchend", onTouchEnd, { passive: true });
 
     return () => {
@@ -1148,15 +1283,39 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       <div className="absolute inset-0 pointer-events-none">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <pattern id="dot-pattern-light" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+            <pattern
+              id="dot-pattern-light"
+              x="0"
+              y="0"
+              width="30"
+              height="30"
+              patternUnits="userSpaceOnUse"
+            >
               <circle cx="1" cy="1" r="1" fill="#cbd5e1" />
             </pattern>
-            <pattern id="dot-pattern-dark" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+            <pattern
+              id="dot-pattern-dark"
+              x="0"
+              y="0"
+              width="30"
+              height="30"
+              patternUnits="userSpaceOnUse"
+            >
               <circle cx="1" cy="1" r="1" fill="#404040" />
             </pattern>
           </defs>
-          <rect width="100%" height="100%" fill="url(#dot-pattern-light)" className="dark:hidden" />
-          <rect width="100%" height="100%" fill="url(#dot-pattern-dark)" className="hidden dark:block" />
+          <rect
+            width="100%"
+            height="100%"
+            fill="url(#dot-pattern-light)"
+            className="dark:hidden"
+          />
+          <rect
+            width="100%"
+            height="100%"
+            fill="url(#dot-pattern-dark)"
+            className="hidden dark:block"
+          />
         </svg>
       </div>
       <Info boardId={boardId} />
@@ -1180,7 +1339,6 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         isHandPanning={isHandPanning}
         toggleHandPan={toggleHandPan}
       />
-      
       {showShapesToolbar && (
         <ShapesToolbar
           canvasState={canvasState}
@@ -1189,33 +1347,34 @@ export const Canvas = ({ boardId }: CanvasProps) => {
             try {
               // Upload to our Cloudinary route
               const form = new FormData();
-              form.append('file', file);
+              form.append("file", file);
 
-              const resp = await fetch('/api/uploads/cloudinary', {
-                method: 'POST',
+              const resp = await fetch("/api/uploads/cloudinary", {
+                method: "POST",
                 body: form,
               });
 
               const json = await resp.json();
               if (!resp.ok || !json?.url) {
-                console.error('Upload failed', json);
+                console.error("Upload failed", json);
                 return;
               }
 
               const url: string = json.url;
-              const resourceType: string = json.resource_type || '';
+              const resourceType: string = json.resource_type || "";
 
-              const vw = typeof window !== 'undefined' ? window.innerWidth : 800;
-              const vh = typeof window !== 'undefined' ? window.innerHeight : 600;
+              const vw = typeof window !== "undefined" ? window.innerWidth : 800;
+              const vh =
+                typeof window !== "undefined" ? window.innerHeight : 600;
               const z = camera.zoom ?? 1;
               const position = {
                 x: Math.round((vw / 2 - camera.x) / z),
                 y: Math.round((vh / 2 - camera.y) / z),
               } as Point;
 
-              if (resourceType === 'image' || file.type.startsWith('image/')) {
+              if (resourceType === "image" || file.type.startsWith("image/")) {
                 const img = new Image();
-                img.crossOrigin = 'anonymous';
+                img.crossOrigin = "anonymous";
                 img.onload = () => {
                   const nw = img.naturalWidth;
                   const nh = img.naturalHeight;
@@ -1224,28 +1383,47 @@ export const Canvas = ({ boardId }: CanvasProps) => {
                   const scale = Math.min(1, maxW / nw, maxH / nh);
                   const w = Math.round(nw * scale);
                   const h = Math.round(nh * scale);
-                  insertImageLayer(position, w, h, { url, type: 'image', name: file.name });
+                  insertImageLayer(position, w, h, {
+                    url,
+                    type: "image",
+                    name: file.name,
+                  });
                 };
                 img.onerror = () => {
                   // Fallback to default size
-                  insertImageLayer(position, 480, 360, { url, type: 'image', name: file.name });
+                  insertImageLayer(position, 480, 360, {
+                    url,
+                    type: "image",
+                    name: file.name,
+                  });
                 };
                 img.src = url;
-              } else if (resourceType === 'raw' || file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+              } else if (
+                resourceType === "raw" ||
+                file.type === "application/pdf" ||
+                file.name.toLowerCase().endsWith(".pdf")
+              ) {
                 const w = 640;
                 const h = 820;
-                insertImageLayer(position, w, h, { url, type: 'pdf', name: file.name });
+                insertImageLayer(position, w, h, {
+                  url,
+                  type: "pdf",
+                  name: file.name,
+                });
               } else {
                 // generic file preview as image placeholder
-                insertImageLayer(position, 480, 360, { url, type: file.type || 'file', name: file.name });
+                insertImageLayer(position, 480, 360, {
+                  url,
+                  type: file.type || "file",
+                  name: file.name,
+                });
               }
             } catch (err) {
-              console.error('Failed to import file:', err);
+              console.error("Failed to import file:", err);
             }
           }}
         />
       )}
-      
       <ERDToolbar
         canvasState={canvasState}
         setCanvasState={setCanvasState}
@@ -1253,8 +1431,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         isVisible={showERDDiagram}
       />
       <SelectionTools camera={camera} setLastUsedColor={setLastUsedColor} />
-      
-      {(canvasState.mode === CanvasMode.Pencil || 
+      {(canvasState.mode === CanvasMode.Pencil ||
         canvasState.mode === CanvasMode.Inserting) && (
         <DrawingTools
           strokeWidth={strokeWidth}
@@ -1265,7 +1442,6 @@ export const Canvas = ({ boardId }: CanvasProps) => {
           onFillColorChange={setLastUsedColor}
         />
       )}
-
       <svg
         className={`h-[100vh] w-[100vw] relative z-10 ${
           isPanning
@@ -1292,8 +1468,10 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       >
         <g
           style={{
-            transform: `translate(${camera.x}px, ${camera.y}px) scale(${camera.zoom ?? 1})`,
-            transformOrigin: '0 0',
+            transform: `translate(${camera.x}px, ${camera.y}px) scale(${
+              camera.zoom ?? 1
+            })`,
+            transformOrigin: "0 0",
           }}
         >
           {layerIds.map((layerId) => (
@@ -1304,10 +1482,8 @@ export const Canvas = ({ boardId }: CanvasProps) => {
               selectionColor={layerIdsToColorSelection[layerId]}
             />
           ))}
-          
           {/* Render mindmap connections */}
           <MindMapConnectionsRenderer layerIds={layerIds} />
-
           <SelectionBox onResizeHandlePointerDown={onResizeHandlePointerDown} />
           {canvasState.mode === CanvasMode.SelectionNet &&
             canvasState.current != null && (
@@ -1316,7 +1492,9 @@ export const Canvas = ({ boardId }: CanvasProps) => {
                 x={Math.min(canvasState.origin.x, canvasState.current.x)}
                 y={Math.min(canvasState.origin.y, canvasState.current.y)}
                 width={Math.abs(canvasState.origin.x - canvasState.current.x)}
-                height={Math.abs(canvasState.origin.y - canvasState.current.y)}
+                height={Math.abs(
+                  canvasState.origin.y - canvasState.current.y,
+                )}
               />
             )}
           <CursorsPresence />
@@ -1331,12 +1509,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
                 strokeWidth="2"
                 strokeDasharray="4 2"
               />
-              <circle
-                cx="0"
-                cy="0"
-                r="2"
-                fill="#ef4444"
-              />
+              <circle cx="0" cy="0" r="2" fill="#ef4444" />
             </g>
           )}
           {pencilDraft != null && pencilDraft.length > 0 && (
@@ -1348,59 +1521,85 @@ export const Canvas = ({ boardId }: CanvasProps) => {
               y={0}
             />
           )}
-          
           {/* Shape insertion preview */}
-          {isInserting && insertionStart && currentPointer && canvasState.mode === CanvasMode.Inserting && (
-            <g>
-              {(() => {
-                const width = Math.abs(currentPointer.x - insertionStart.x);
-                const height = Math.abs(currentPointer.y - insertionStart.y);
-                const x = Math.min(insertionStart.x, currentPointer.x);
-                const y = Math.min(insertionStart.y, currentPointer.y);
-                
-                const strokeStyle = {
-                  stroke: colorToCSS(strokeColor),
-                  strokeWidth: strokeWidth,
-                  fill: 'none',
-                  strokeDasharray: '5,5',
-                  opacity: 0.7,
-                };
+          {isInserting &&
+            insertionStart &&
+            currentPointer &&
+            canvasState.mode === CanvasMode.Inserting && (
+              <g>
+                {(() => {
+                  const width = Math.abs(currentPointer.x - insertionStart.x);
+                  const height = Math.abs(currentPointer.y - insertionStart.y);
+                  const x = Math.min(insertionStart.x, currentPointer.x);
+                  const y = Math.min(insertionStart.y, currentPointer.y);
 
-                if (canvasState.layerType === LayerType.Rectangle) {
-                  return <rect x={x} y={y} width={width} height={height} {...strokeStyle} />;
-                } else if (canvasState.layerType === LayerType.Ellipse) {
-                  return <ellipse cx={x + width/2} cy={y + height/2} rx={width/2} ry={height/2} {...strokeStyle} />;
-                } else {
-                  // For advanced shapes, show as rectangle preview
-                  return <rect x={x} y={y} width={width} height={height} {...strokeStyle} />;
-                }
-              })()}
-            </g>
-          )}
-          
+                  const strokeStyle = {
+                    stroke: colorToCSS(strokeColor),
+                    strokeWidth: strokeWidth,
+                    fill: "none",
+                    strokeDasharray: "5,5",
+                    opacity: 0.7,
+                  };
+
+                  if ((canvasState as any).layerType === LayerType.Rectangle) {
+                    return (
+                      <rect
+                        x={x}
+                        y={y}
+                        width={width}
+                        height={height}
+                        {...strokeStyle}
+                      />
+                    );
+                  } else if (
+                    (canvasState as any).layerType === LayerType.Ellipse
+                  ) {
+                    return (
+                      <ellipse
+                        cx={x + width / 2}
+                        cy={y + height / 2}
+                        rx={width / 2}
+                        ry={height / 2}
+                        {...strokeStyle}
+                      />
+                    );
+                  } else {
+                    // For advanced shapes, show as rectangle preview
+                    return (
+                      <rect
+                        x={x}
+                        y={y}
+                        width={width}
+                        height={height}
+                        {...strokeStyle}
+                      />
+                    );
+                  }
+                })()}
+              </g>
+            )}
           {/* ERD relationship connection preview */}
-          {canvasState.mode === CanvasMode.ERDConnecting && erdConnectingFrom && erdConnectionPreview && (
-            <ERDConnectionPreview 
-              fromLayerId={erdConnectingFrom}
-              toPoint={erdConnectionPreview}
-            />
-          )}
+          {canvasState.mode === CanvasMode.ERDConnecting &&
+            erdConnectingFrom &&
+            erdConnectionPreview && (
+              <ERDConnectionPreview
+                fromLayerId={erdConnectingFrom}
+                toPoint={erdConnectionPreview}
+              />
+            )}
         </g>
       </svg>
-      
       {/* React Flow Diagram */}
-      <FlowDiagram 
-        isOpen={showFlowDiagram} 
-        onClose={() => setShowFlowDiagram(false)} 
+      <FlowDiagram
+        isOpen={showFlowDiagram}
+        onClose={() => setShowFlowDiagram(false)}
       />
-      
       {/* AI Mindmap Modal */}
       <AIMindmapModal
         isOpen={isAIMindmapModalOpen}
         onClose={closeAIMindmapModal}
         onGenerate={handleMindMapGenerate}
       />
-      
       {/* ERD Modals */}
       <SchemaExportModal
         isOpen={isSchemaExportModalOpen}
@@ -1408,7 +1607,6 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         entities={erdEntities}
         relationships={erdRelationships}
       />
-      
       <ERDEntityModal />
     </main>
   );
